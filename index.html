@@ -548,7 +548,7 @@ renderMissions();
 toast(isNew ? `New Discover：${res.name} ${res.emoji.join('')}` 
             : `合成成功：${res.name} ${res.emoji.join('')}`);
 
-
+}
     // ---------- Controls ----------
     function debounce(fn, ms){ let h; return (...a)=>{ clearTimeout(h); h=setTimeout(()=>fn(...a), ms); }; }
     searchEl.addEventListener('input', debounce(()=>{ renderCatalog(searchEl.value.trim()); }, 80));
