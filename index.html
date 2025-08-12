@@ -219,6 +219,22 @@ const seedRecipes = {
   '土+時間':['化石',['🦴']],
   '生命+金屬':['賽博',['🧬','🤖']]
 };
+    // 依照 normPair(a,b) 規則，把 seedRecipes 變成可查表的索引
+const recipeIndex = (() => {
+  const m = {};
+  for (const k in seedRecipes) {
+    const [a, b] = k.split('+');
+    m[normPair(a, b)] = seedRecipes[k]; // ['結果名', ['emoji...']]
+  }
+  return m;
+})();
+
+// 取得配方：先查種子表，再查玩家曾經生成過的 state.known
+function getRecipeByKey(key) {
+  const seed = recipeIndex[key];
+  if (seed) return { name: seed[0], emoji: seed[1] };
+  return state.known[key] || null;
+}
     const emojiPool = ['🪐','✨','🧪','🧲','🧠','🎲','🧯','🛰️','🪄','📦','🛸','🧰','🎇','🔮','🗿','🧊','🧱','🌋','🌪️','🌊','🌌','🌈','🪵','🍞','🥚','🍰','🍫','☂️','🎺','⚗️','🧵','🧷','🧫','🪤','📡','🔧','🧭'];
 
     // ---------- Helpers ----------
@@ -506,8 +522,9 @@ function hardReset(){
         if (!Array.isArray(a.emoji)) a.emoji = [a.emoji];
         if (!Array.isArray(b.emoji)) b.emoji = [b.emoji];
       const key = normPair(a.name,b.name);
-      let res = state.known[key];
+      let res = getRecipeByKey(key);
       let isNew = false; let rare = false;
+      let createdNow = false;
       if(!res){
         const name = generateName(a.name,b.name);
         const emoji = pickEmojiByName(name);
