@@ -539,11 +539,15 @@ function hardReset(){
 
       // mission check
       for(const m of state.missions){ if(!m.done && m.name===res.name){ m.done=true; toast(`任務完成：${m.name} ${m.emoji.join('')}`); } }
- 
-      saveState();
-      renderBook(); renderHistory(); renderCatalog(searchEl.value.trim()); renderMissions();
-      toast(isNew? `New Discover：${res.name} ${res.emoji.join('')}` : `合成成功：${res.name} ${res.emoji.join('')}`);
-    }
+saveState();
+renderBook(); 
+renderHistory(); 
+renderCatalog(searchEl.value.trim()); 
+renderMissions();
+
+toast(isNew ? `New Discover：${res.name} ${res.emoji.join('')}` 
+            : `合成成功：${res.name} ${res.emoji.join('')}`);
+
 
     // ---------- Controls ----------
     function debounce(fn, ms){ let h; return (...a)=>{ clearTimeout(h); h=setTimeout(()=>fn(...a), ms); }; }
