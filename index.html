@@ -382,6 +382,15 @@ function makeCard(name, emojis, rare = false) {
         setTimeout(()=>s.remove(), 900);
       }
     }
+    function playClick(){
+  try {
+    const audio = new Audio('click.ogg');
+    audio.play().catch(err => console.warn('click 音效播放被阻擋', err));
+  } catch (err) {
+    console.warn('播放 click.ogg 失敗', err);
+  }
+}
+
 
     // ---------- State ----------
     let state = loadState() || {
@@ -633,6 +642,7 @@ function hardReset(){
     document.getElementById('rerollMissions').addEventListener('click', ()=>{ regenMissions(); saveState(); renderMissions(); toast('已重擲任務'); });
 
     document.getElementById('exportBtn').addEventListener('click', ()=>{
+      playClick();
       const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href=url; a.download='iec_save.json'; a.click(); URL.revokeObjectURL(url);
@@ -640,6 +650,7 @@ function hardReset(){
     });
 
     document.getElementById('importBtn').addEventListener('click', ()=>{
+      playClick();
       const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json';
       inp.onchange = ev => {
         const f = ev.target.files[0]; if(!f) return;
@@ -675,12 +686,14 @@ function hardReset(){
       };
       resetBtn.addEventListener('click', (e)=>{
         e.preventDefault();
+        playClick();
         if(!resetBtn.dataset.armed){ arm(); return; }
         clearTimeout(armTimer); disarm(); hardReset();
       });
       // keyboard friendly
       resetBtn.addEventListener('keydown', (e)=>{
         if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); resetBtn.click(); }
+        playClick();
       });
     })();
     function renderAll(){
