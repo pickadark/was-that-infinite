@@ -733,21 +733,14 @@ for (const m of state.missions) {
   if (!m.done && m.name === res.name) {
     m.done = true;
     toast(`任務完成：${m.name} ${m.emoji.join('')}`);
-
-    // 立刻換成新的「尚未獲得」任務
-    const next = pickEligibleMission();
-    if (next) {
-      Object.assign(m, {
-        name: next,
-        emoji: Array.isArray(state.unlocked[next]) ? state.unlocked[next]
-             : (resultEmojiMap[next] || pickEmojiByName(next)),
-        done: false
-      });
-    }
   }
 }
-// 依規格：保持任務數量固定
-regenMissions(3);
+// 全組完成才自動重擲
+const allDone = state.missions.length > 0 && state.missions.every(m => m.done);
+if (allDone) {
+  regenMissions();              // 重新抽一整組（預設 3 個）
+}
+
 
   saveState();
 
