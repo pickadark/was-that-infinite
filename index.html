@@ -603,24 +603,24 @@ function pickEligibleMission(){
 
 
 // 替換原本的 regenMissions()
- // === REPLACE: regenMissions() ===
-function regenMissions(count = 3){
+function regenMissions(count = 3, { force = false } = {}) {
   state.missions = Array.isArray(state.missions) ? state.missions : [];
+  // force=true：清空；否則只保留未完成
+  state.missions = force ? [] : state.missions.filter(m => m && !m.done);
 
-  // 先保留尚未完成的
-  state.missions = state.missions.filter(m => m && !m.done);
-
-  // 補到指定數量，來源只挑「尚未獲得、且不重複現有任務」
+  let added = 0;
   while (state.missions.length < count) {
     const next = pickEligibleMission();
-    if (!next) break; // 沒東西可補就停
+    if (!next) break;
     state.missions.push({
       name: next,
       emoji: Array.isArray(state.unlocked[next]) ? state.unlocked[next]
            : (resultEmojiMap[next] || pickEmojiByName(next)),
       done: false
     });
+    added++;
   }
+  return added;
 }
 
 
@@ -760,8 +760,13 @@ if (allDone) {
     // ---------- Controls ----------
     function debounce(fn, ms){ let h; return (...a)=>{ clearTimeout(h); h=setTimeout(()=>fn(...a), ms); }; }
     searchEl.addEventListener('input', debounce(()=>{ renderCatalog(searchEl.value.trim()); }, 80));
+document.getElementById('rerollMissions').addEventListener('click', ()=>{
+  const added = regenMissions(3, { force: true }); // ← 關鍵
+  saveState();
+  renderMissions();
+  toast(added > 0 ? '已重擲任務' : '沒有可重擲的任務');
+});
 
-    document.getElementById('rerollMissions').addEventListener('click', ()=>{ regenMissions(); saveState(); renderMissions(); toast('已重擲任務'); });
 
     document.getElementById('exportBtn').addEventListener('click', ()=>{
       playClick();
