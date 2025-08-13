@@ -316,7 +316,7 @@ const emojiImgCache = new Map();
 function makeCard(name, emojis, rare = false) {
   const list = Array.isArray(emojis) ? emojis : [emojis];
   const el = document.createElement('div');
-  el.className = 'card' + (rare ? ' rare' : '');
+  el.className = 'card'
   el.draggable = true;
   el.dataset.name = name;
 
