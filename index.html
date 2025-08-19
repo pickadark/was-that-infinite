@@ -5,19 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Was that Infinite? — Local Prototype</title>
   <style>
-    @font-face{
+        @font-face{
   font-family:'GlowSansTC';
   src:url('GlowSansTC-subset.woff2') format('woff2');
   font-weight:100 900;
   font-style:normal;
   font-display:swap;
 }
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap');
     :root{
       --bg:#0f1115; --panel:#141823; --card:#1a2030; --muted:#9aa0a6; --fg:#e9eef5; --accent:#6dd5fa; --accent2:#7f53ac;
       --good:#19c37d; --warn:#ffb020; --bad:#ff5d5d; --glow:0 0 0 1px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.45);
     }
     html,body{height:100%}
-    body{margin:0;background:radial-gradient(1200px 1200px at 0% 0%,#121726 0%,#0f1115 50%,#0b0d12 100%);color:var(--fg);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans TC",sans-serif}
+
+body {
+  margin:0;
+  background:radial-gradient(1200px 1200px at 0% 0%,#121726 0%,#0f1115 50%,#0b0d12 100%);
+  color:var(--fg);
+  font-family: "Noto Sans TC", sans-serif;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
     .app{display:grid;grid-template-columns:320px 1fr 360px;grid-template-rows:auto 1fr auto;grid-template-areas:
       'header header header'
       'left main right'
@@ -121,8 +131,6 @@ body{ cursor: var(--cursor-normal); }
 
 /* 拖曳中（由 JS 切換 .dragging） */
 .app.dragging, .app.dragging *{ cursor: var(--cursor-drag) !important; }
-
-/* 在放置區上方也保持拖曳樣式，避免被瀏覽器抓走 */
 .dropzone{ cursor: var(--cursor-normal); }
 .app.dragging .dropzone{ cursor: var(--cursor-drag) !important; }
 .token{ cursor: inherit; }
@@ -134,7 +142,8 @@ body{ cursor: var(--cursor-normal); }
   </style>
 </head>
 <body>
-  <audio id="introBgm" src="cosmic.wav" preload="auto"></audio>
+  <audio id="introBgm" src="cosmic.wav" preload="auto" playsinline></audio>
+
   <div class="app">
     <header>
       <h1>Was that Infinite? <span class="pill">Local Prototype</span></h1>
@@ -705,7 +714,6 @@ function hardReset(){
     history: [],
     missions: []
   };
-  // 只保留初始基礎元素
   for (const [n, e] of firstPool) {
     state.unlocked[n] = e;
   }
@@ -764,8 +772,6 @@ function hardReset(){
   const key = normPair(a.name,b.name);
   let res = state.known[key];
   let isNew = false; let rare = false;
-
-  // ← 新增：優先吃 seed 配方
   if (!res) {
     const seed = seedMap[key];
     if (seed) {
@@ -887,7 +893,6 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
         if(!resetBtn.dataset.armed){ arm(); return; }
         clearTimeout(armTimer); disarm(); hardReset();
       });
-      // keyboard friendly
       resetBtn.addEventListener('keydown', (e)=>{
         if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); resetBtn.click(); }
         playClick();
@@ -908,6 +913,7 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
   const intro   = document.getElementById('intro');
   const textEl  = document.getElementById('introText');
   if(!intro || !textEl) return;
+  textEl.textContent = '點擊以開始';
 
   const frames = [
     { t: '在很久以後的某天，一個高等文明的實驗室裡，某次不該失敗的維度展開實驗失敗了。', hold: 2500 },
@@ -919,20 +925,34 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
     { t: '準備就緒。', hold: 2500 },
   ];
   const bgm = document.getElementById('introBgm');
-
+})();
   function playBgm(){
-    if (!bgm) return;
-    bgm.currentTime = 0;
-    bgm.volume = 0;
-    bgm.play().catch(()=>{});
-    // 漸入
+  if (!bgm) return;
+  bgm.currentTime = 0;
+  bgm.volume = 0;
+
+  const fadeIn = () => {
     let v = 0;
     const fade = setInterval(()=>{
       v += 0.05;
       if(v >= 0.4){ v = 0.4; clearInterval(fade); }
       bgm.volume = v;
     }, 120);
-  }
+  };
+
+  const tryPlay = () => {
+    bgm.play().then(fadeIn).catch(() => {
+      const once = () => {
+        document.removeEventListener('pointerdown', once, {capture:false});
+        bgm.play().then(fadeIn).catch(()=>{ /* 還不行就算了 */ });
+      };  
+      document.addEventListener('pointerdown', once, {once:true});
+    });
+  };
+
+  tryPlay();
+}
+
 
   function stopBgm(){
     if (!bgm) return;
@@ -974,32 +994,24 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
   }
 
   // 執行片頭
-  (async function run(){
-    playBgm();
+    async function run(){
+    playBgm();    // 這裡不動
     showOverlay();
-    // 小提示（不干擾）
-    try {
-      const hint = document.createElement('div');
-      hint.style.position='absolute';
-      hint.style.bottom='18px';
-      hint.style.left='50%';
-      hint.style.transform='translateX(-50%)';
-      hint.style.fontSize='12px';
-      hint.style.opacity='.65';
-      intro.querySelector('.intro-inner')?.appendChild(hint);
-    } catch {}
 
     for(const f of frames){
       await typeLine(f.t);
       await new Promise(r=> setTimeout(r, f.hold||800));
       textEl.textContent = textEl.textContent + '\n';
     }
+
     try { localStorage.setItem(INTRO_KEY, '1'); } catch {}
     hideOverlay();
-    stopBgm()
-  })();
-})();
-// --- custom cursor state ---
+    stopBgm();
+    intro.addEventListener('pointerdown', ()=>{
+  run();
+}, {once:true});
+  }
+
 (function installCustomCursor(){
   const app = document.querySelector('.app');
   if(!app) return;
@@ -1016,7 +1028,6 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
   document.addEventListener('dragend', clearDrag);
   document.addEventListener('drop', clearDrag);
   document.addEventListener('mouseleave', e=>{
-    // 偶發卡住時保險解除
     if(e.relatedTarget == null) clearDrag();
   });
 })();
