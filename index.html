@@ -19,7 +19,7 @@
     header{grid-area:header;display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #202637;background:#0e1320;position:sticky;top:0;z-index:10}
     header h1{margin:0;font-size:18px;letter-spacing:.3px;font-weight:700}
     header .actions{margin-left:auto;display:flex;gap:8px}
-    button, .btn{background:linear-gradient(135deg,rgba(125,146,255,.12),rgba(125,146,255,.05));border:1px solid #2b3350;color:var(--fg);padding:8px 10px;border-radius:12px;cursor:pointer;box-shadow:var(--glow);transition:transform .05s ease}
+    button, .btn{background:linear-gradient(135deg,rgba(125,146,255,.12),rgba(125,146,255,.05));border:1px solid #2b3350;color:var(--fg);padding:8px 10px;border-radius:12px;cursor: var(--cursor-normal);box-shadow:var(--glow);transition:transform .05s ease}
     button:hover{transform:translateY(-1px)}
     button:active{transform:translateY(0)}
     .pill{font-size:12px;padding:6px 8px;border-radius:999px;background:#111726;border:1px solid #28304a;color:var(--muted)}
@@ -29,9 +29,10 @@
     .left input{flex:1;width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2b3350;background:#0f1422;color:var(--fg)}
     .catalog{padding:8px 10px;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
-    .card{user-select:none;background:linear-gradient(180deg,#1b2233,#151b29);border:1px solid #2a3250;border-radius:14px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:var(--glow);cursor:grab}
+    .card{user-select:none;background:linear-gradient(180deg,#1b2233,#151b29);border:1px solid #2a3250;border-radius:14px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:var(--glow)}
+    .card{ cursor: inherit; }
     .card.rare{outline:2px solid #b78cff; box-shadow:0 0 12px rgba(183,140,255,.45), var(--glow)}
-    .card:active{cursor:grabbing}
+    .card:active{ cursor: inherit; }
     .emoji{font-size:28px}
     .name{font-size:12px;color:#c7d0dd;text-align:center}
 
@@ -992,13 +993,16 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
   const app = document.querySelector('.app');
   if(!app) return;
 
-  // 只要拖一張卡就進入 dragging 狀態
-  document.addEventListener('dragstart', e=>{
-    const target = e.target;
-    if(target && target.closest && target.closest('.card')){
+document.addEventListener('dragstart', e => {
+  const target = e.target;
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = 'none';
+    if (target && target.closest && target.closest('.card')) {
       app.classList.add('dragging');
     }
-  });
+  } 
+});
+
 
   const clearDrag = ()=> app.classList.remove('dragging');
   document.addEventListener('dragend', clearDrag);
