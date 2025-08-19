@@ -8,12 +8,9 @@
     :root{
       --bg:#0f1115; --panel:#141823; --card:#1a2030; --muted:#9aa0a6; --fg:#e9eef5; --accent:#6dd5fa; --accent2:#7f53ac;
       --good:#19c37d; --warn:#ffb020; --bad:#ff5d5d; --glow:0 0 0 1px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.45);
-      --cursor-normal: url("X-cursor.png") 8 8, auto;   
-      --cursor-drag:   url("X-cursor-drag.png") 10 10, grabbing;
     }
     html,body{height:100%}
-    body{margin:0;background:radial-gradient(1200px 1200px at 0% 0%,#121726 0%,#0f1115 50%,#0b0d12 100%);color:var(--fg);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans TC",sans-serif; cursor: var(--cursor-normal);}
-
+    body{margin:0;background:radial-gradient(1200px 1200px at 0% 0%,#121726 0%,#0f1115 50%,#0b0d12 100%);color:var(--fg);font:16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,"Noto Sans TC",sans-serif}
     .app{display:grid;grid-template-columns:320px 1fr 360px;grid-template-rows:auto 1fr auto;grid-template-areas:
       'header header header'
       'left main right'
@@ -22,7 +19,7 @@
     header{grid-area:header;display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid #202637;background:#0e1320;position:sticky;top:0;z-index:10}
     header h1{margin:0;font-size:18px;letter-spacing:.3px;font-weight:700}
     header .actions{margin-left:auto;display:flex;gap:8px}
-    button, .btn{background:linear-gradient(135deg,rgba(125,146,255,.12),rgba(125,146,255,.05));border:1px solid #2b3350;color:var(--fg);padding:8px 10px;border-radius:12px;cursor: var(--cursor-normal);box-shadow:var(--glow);transition:transform .05s ease}
+    button, .btn{background:linear-gradient(135deg,rgba(125,146,255,.12),rgba(125,146,255,.05));border:1px solid #2b3350;color:var(--fg);padding:8px 10px;border-radius:12px;cursor:pointer;box-shadow:var(--glow);transition:transform .05s ease}
     button:hover{transform:translateY(-1px)}
     button:active{transform:translateY(0)}
     .pill{font-size:12px;padding:6px 8px;border-radius:999px;background:#111726;border:1px solid #28304a;color:var(--muted)}
@@ -32,25 +29,19 @@
     .left input{flex:1;width:100%;padding:10px 12px;border-radius:10px;border:1px solid #2b3350;background:#0f1422;color:var(--fg)}
     .catalog{padding:8px 10px;overflow:auto;display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
-    .card{
-      user-select:none;background:linear-gradient(180deg,#1b2233,#151b29);
-      border:1px solid #2a3250;border-radius:14px;padding:10px;display:flex;
-      flex-direction:column;align-items:center;gap:6px;box-shadow:var(--glow);
-      cursor: inherit; touch-action: none;
-    }
+    .card{user-select:none;background:linear-gradient(180deg,#1b2233,#151b29);border:1px solid #2a3250;border-radius:14px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:var(--glow);cursor:grab}
     .card.rare{outline:2px solid #b78cff; box-shadow:0 0 12px rgba(183,140,255,.45), var(--glow)}
-    .card:active{cursor: inherit}
+    .card:active{cursor:grabbing}
     .emoji{font-size:28px}
     .name{font-size:12px;color:#c7d0dd;text-align:center}
 
     .main{grid-area:main;position:relative;display:grid;grid-template-rows:1fr 220px}
     .board{position:relative;overflow:hidden}
-    .dropzone{position:absolute;inset:0;display:grid;place-items:center;border:2px dashed #2a3250;border-radius:16px;margin:16px;background:linear-gradient(180deg,rgba(109,213,250,.08),rgba(127,83,172,.08)); cursor: var(--cursor-normal);}
+    .dropzone{position:absolute;inset:0;display:grid;place-items:center;border:2px dashed #2a3250;border-radius:16px;margin:16px;background:linear-gradient(180deg,rgba(109,213,250,.08),rgba(127,83,172,.08))}
     .dropzone .hint{opacity:.8;color:var(--muted)}
 
     .workspace{position:absolute;inset:0;margin:16px;border-radius:16px;pointer-events:none}
-    .token{position:absolute;pointer-events:auto;transform:translate(-50%,-50%); transition: opacity 0.25s ease; cursor: inherit;}
-    .token.fade-out { opacity: 0; }
+    .token{position:absolute;pointer-events:auto;transform:translate(-50%,-50%);}
     .token .card{padding:8px 10px}
 
     .combos{border-top:1px solid #22283d;background:#0e1423;overflow:auto}
@@ -76,38 +67,60 @@
     .toast.show{opacity:1;transform:translateY(0)}
     .sparkle{position:absolute;font-size:18px;pointer-events:none;animation:spark .8s ease forwards}
     @keyframes spark{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}40%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-70%) scale(.3)}}
-    .emoji {font-size: 28px;}
+    .emoji-container {
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  align-items: center;     /* 垂直居中 */
+  gap: 4px;               /* emoji 之間的間距 */
+}
+.token { transition: opacity 0.25s ease; }
+.token.fade-out { opacity: 0; }
+.emoji {font-size: 28px;}
+/* Intro cutscene */
+.intro{position:fixed;inset:0;background:#000;color:#e9eef5;
+  display:flex;align-items:center;justify-content:center;z-index:9999;
+  opacity:1;transition:opacity .8s ease}
+.intro.hidden{display:none}
+.intro.fade{opacity:0}
+.intro-inner{position:relative;max-width:70ch;padding:32px 28px;
+  font-size:18px;line-height:1.75;letter-spacing:.2px}
+.intro-text{white-space:pre-line;text-align:center}
 
-    /* Intro cutscene */
-    .intro{position:fixed;inset:0;background:#000;color:#e9eef5;
-      display:flex;align-items:center;justify-content:center;z-index:9999;
-      opacity:1;transition:opacity .8s ease}
-    .intro.hidden{display:none}
-    .intro.fade{opacity:0}
-    .intro-inner{position:relative;max-width:70ch;padding:32px 28px;
-      font-size:18px;line-height:1.75;letter-spacing:.2px}
-    .intro-text{white-space:pre-line;text-align:center}
-    .intro .scan{pointer-events:none;position:absolute;inset:-8px;border-radius:8px;
-      background:repeating-linear-gradient( to bottom,
-        rgba(255,255,255,.045) 0, rgba(255,255,255,.045) 1px,
-        transparent 2px, transparent 3px); mix-blend-mode:overlay;
-      animation:introScan 7.5s linear infinite; opacity:.18}
-    @keyframes introScan{from{transform:translateY(-100%)}to{transform:translateY(100%)}}
-    .intro::after{
-      content:"";
-      position:absolute; inset:0; pointer-events:none; opacity:.10;
-      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      animation:introNoise .25s steps(2) infinite;
-    }
+/* 視覺雜訊掃描線 */
+.intro .scan{pointer-events:none;position:absolute;inset:-8px;border-radius:8px;
+  background:repeating-linear-gradient( to bottom,
+    rgba(255,255,255,.045) 0, rgba(255,255,255,.045) 1px,
+    transparent 2px, transparent 3px); mix-blend-mode:overlay;
+  animation:introScan 7.5s linear infinite; opacity:.18}
+@keyframes introScan{from{transform:translateY(-100%)}to{transform:translateY(100%)}}
+.intro::after{
+  content:"";
+  position:absolute; inset:0; pointer-events:none; opacity:.10;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:introNoise .25s steps(2) infinite;
+}
+    /* tiny test panel */
+    #testPanel{position:fixed;left:10px;bottom:10px;max-width:44ch;background:#0e1423;border:1px solid #2a3352;color:#cfe2ff;padding:8px 10px;border-radius:10px;box-shadow:var(--glow);font-size:12px;opacity:.9}
+    #testPanel summary{cursor:pointer;color:#9cc0ff}
+      /* armed reset visual */
+    #resetBtn.armed{ border-color:#ff4d4f !important; background:linear-gradient(135deg, rgba(255,77,79,.18), rgba(255,77,79,.08)); color:#ffecec }
+    :root{
+  --cursor-normal: url("X-cursor.png") 8 8, auto;   
+  --cursor-drag:   url("X-cursor-drag.png") 10 10, grabbing;
+}
 
-    /* Drag ghost for fake DnD */
-    .drag-ghost{
-      position: fixed; left: 0; top: 0; pointer-events: none; z-index: 99999;
-      transform: translate(-50%,-50%);
-    }
+/* 預設游標 */
+body{ cursor: var(--cursor-normal); }
 
-    /* 拖曳中（由 JS 切換 .dragging） */
-    .app.dragging, .app.dragging *{ cursor: var(--cursor-drag) !important; }
+/* 拖曳中（由 JS 切換 .dragging） */
+.app.dragging, .app.dragging *{ cursor: var(--cursor-drag) !important; }
+
+/* 在放置區上方也保持拖曳樣式，避免被瀏覽器抓走 */
+.dropzone{ cursor: var(--cursor-normal); }
+.app.dragging .dropzone{ cursor: var(--cursor-drag) !important; }
+.token{ cursor: inherit; }
+
+
   </style>
 </head>
 <body>
@@ -160,14 +173,13 @@
   </div>
 
   <div id="toast" class="toast"></div>
-
-  <!-- CUTSCENE: Intro -->
-  <div id="intro" class="intro hidden">
-    <div class="intro-inner">
-      <div class="scan"></div>
-      <div class="intro-text" id="introText"></div>
-    </div>
+<!-- CUTSCENE: Intro -->
+<div id="intro" class="intro hidden">
+  <div class="intro-inner">
+    <div class="scan"></div>
+    <div class="intro-text" id="introText"></div>
   </div>
+</div>
 
   <script>
     // ---------- Versioning ----------
@@ -218,257 +230,275 @@
     }
 
     // ---------- Data ----------
-    const firstPool = [
-      ['水',['💧']], ['火',['🔥']], ['土',['🟫']], ['風',['💨']]
-    ];
-    const seedRecipes = {
-      '水+土':['泥',['🟤']],
-      '火+火':['烈焰',['🔥','🔥']],
-      '水+水':['河',['💧','🌊']],
-      '火+水':['蒸氣',['💨']],
-      '風+風':['颶風',['💨','💨']],
-      '月球+水':['月泉',['🌕','💧']],
-      '河+石頭':['沙',['🏜️']],
-      '海+樹':['珊瑚',['🪸']],
-      '熔爐+雜金屬':['純金屬',['⚙️']],
-      '水+泥':['泥漿',['🟤','💧']],
-      '水+沙':['泥漿',['🟤','💧']],
-      '風+沙':['沙塵暴',['💨','🪨']],
-      '火+煙':['灰燼',['🔥','🌫️']],
-      '灰燼+水':['灰水',['🌫️','💧']],  
-      '灰燼+土':['沃壤',['🟫','✨']],
-      '沃壤+植物':['作物',['🌾']],
-      '河+河':['湖',['💧','🏞️']],
-      '湖+湖':['海',['🌊']],
-      '泥+光':['細胞',['🦠']],
-      '細胞+細胞':['生命',['🌱']],
-      '雜金屬+風':['電',['⚡']],
-      '風+泥':['泥沙暴',['💨','🟤']],
-      '細胞+水':['水細胞',['🦠','💧']],
-      '細胞+土':['土細胞',['🦠','🟫']],
-      '細胞+風':['風細胞',['🦠','💨']],
-      '水泥+磚':['牆',['🧱','🏗️']],
-      '細胞+火':['火細胞',['🦠','🔥']],
-      '火+土':['磚',['🧱']],
-      '火+泥':['黏土',['🟤','🪨']],
-      '牆+天空':['天花板',['🏠','⬜']],
-      '天花板+牆':['房間',['🏠','🚪']],
-      '火+黏土':['水泥',['🧱','🪨']],
-      '土+土':['石頭',['🪨']],
-      '石頭+火':['雜金屬',['⚙️']],
-      '風+火':['煙',['🌫️']],
-      '風+水':['雲',['☁️']],
-      '雲+風':['天空',['🌈']],
-      '雲+電':['雷',['🌩️']],
-      '風+雨':['暴雨',['⛈️']],
-      '雲+水':['雨',['🌧️']],
-      '天空+火':['太陽',['☀️']],
-      '天空+電':['光',['✨']],
-      '天空+光':['月球',['🌕']],
-      '太陽+月球':['時間',['⌛️']],
-      '生命+土':['植物',['🌿']],
-      '植物+時間':['樹',['🌳']],
-      '電+水': ['電解水',['⚡','💧']],
-      '植物+雨':['花朵',['🌸']],
-      '植物+水':['水生植物',['💧','🌿']],
-      '雜金屬+電':['低階機器',['🤖']],
-      '純金屬+電':['高階機器',['🤖']],
-      '水+時間':['冰',['🧊']],
-      '水+冰':['雪',['❄️']],
-      '火+雜金屬':['熔爐',['🔥','🏭']],
-      '生命+水':['魚',['🐟']],
-      '魚+電':['電鰻',['🐟','⚡']],
-      '土+時間':['化石',['🦴']],
-      '生命+純金屬':['賽博',['🧬','🤖']]
-    };
+const firstPool = [
+  ['水',['💧']], ['火',['🔥']], ['土',['🟫']], ['風',['💨']]
+];
+const seedRecipes = {
+  '水+土':['泥',['🟤']],
+  '火+火':['烈焰',['🔥','🔥']],
+  '水+水':['河',['💧','🌊']],
+  '火+水':['蒸氣',['💨']],
+  '風+風':['颶風',['💨','💨']],
+  '月球+水':['月泉',['🌕','💧']],
+  '河+石頭':['沙',['🏜️']],
+  '海+樹':['珊瑚',['🪸']],
+  '熔爐+雜金屬':['純金屬',['⚙️']],
+  '水+泥':['泥漿',['🟤','💧']],
+  '水+沙':['泥漿',['🟤','💧']],
+  '風+沙':['沙塵暴',['💨','🪨']],
+  '火+煙':['灰燼',['🔥','🌫️']],
+  '灰燼+水':['灰水',['🌫️','💧']],  
+  '灰燼+土':['沃壤',['🟫','✨']],
+  '沃壤+植物':['作物',['🌾']],
+  '河+河':['湖',['💧','🏞️']],
+  '湖+湖':['海',['🌊']],
+  '泥+光':['細胞',['🦠']],
+  '細胞+細胞':['生命',['🌱']],
+  '雜金屬+風':['電',['⚡']],
+  '風+泥':['泥沙暴',['💨','🟤']],
+  '細胞+水':['水細胞',['🦠','💧']],
+  '細胞+土':['土細胞',['🦠','🟫']],
+  '細胞+風':['風細胞',['🦠','💨']],
+  '水泥+磚':['牆',['🧱','🏗️']],
+  '細胞+火':['火細胞',['🦠','🔥']],
+  '火+土':['磚',['🧱']],
+  '火+泥':['黏土',['🟤','🪨']],
+  '牆+天空':['天花板',['🏠','⬜']],
+  '天花板+牆':['房間',['🏠','🚪']],
+  '火+黏土':['水泥',['🧱','🪨']],
+  '土+土':['石頭',['🪨']],
+  '石頭+火':['雜金屬',['⚙️']],
+  '風+火':['煙',['🌫️']],
+  '風+水':['雲',['☁️']],
+  '雲+風':['天空',['🌈']],
+  '雲+電':['雷',['🌩️']],
+  '風+雨':['暴雨',['⛈️']],
+  '雲+水':['雨',['🌧️']],
+  '天空+火':['太陽',['☀️']],
+  '天空+電':['光',['✨']],
+  '天空+光':['月球',['🌕']],
+  '太陽+月球':['時間',['⌛️']],
+  '生命+土':['植物',['🌿']],
+  '植物+時間':['樹',['🌳']],
+  '電+水': ['電解水',['⚡','💧']],
+  '植物+雨':['花朵',['🌸']],
+  '植物+水':['水生植物',['💧','🌿']],
+  '雜金屬+電':['低階機器',['🤖']],
+  '純金屬+電':['高階機器',['🤖']],
+  '水+時間':['冰',['🧊']],
+  '水+冰':['雪',['❄️']],
+  '火+雜金屬':['熔爐',['🔥','🏭']],
+  '生命+水':['魚',['🐟']],
+  '魚+電':['電鰻',['🐟','⚡']],
+  '土+時間':['化石',['🦴']],
+  '生命+純金屬':['賽博',['🧬','🤖']]
+};
 
-    const normPair = (a,b) => [a,b].sort().join('+');
-    const seedMap = {};
-    for (const [k, v] of Object.entries(seedRecipes)) {
-      const [a, b] = k.split('+');
-      seedMap[normPair(a, b)] = v;
-    }
-    const resultEmojiMap = {};
-    for (const [k, v] of Object.entries(seedRecipes)) {
-      const [name, emoji] = v;
-      resultEmojiMap[name] = Array.isArray(emoji) ? emoji : [emoji];
-    }
-
-    const rules = [
-      [/黑洞|宇宙|銀河|星系|行星|恆星|星|彗星/, ['🪐']],
-      [/水|泉|雨|滴/, ['💧']],
-      [/海|潮|浪|洋/, ['🌊']],
-      [/河|湖/, ['🏞️']],             
-      [/樹|林|木|森|松|柏/, ['🌲']],
-      [/花|瓣|櫻|梅|菊|蓮|蘭/, ['🌸']],
-      [/蟲|幼蟲/, ['🐛']],
-      [/蝶/, ['🦋']],
-      [/甲蟲|鍬形蟲|金龜子/, ['🪲']],
-      [/蜂/, ['🐝']],
-      [/螞蟻|蟻/, ['🐜']],
-      [/蚊/, ['🦟']],
-      [/瓢蟲/, ['🐞']],
-      [/磁|磁鐵|磁場/, ['🧲']],
-      [/冰|結冰/, ['🧊']],
-      [/雪|霜|寒/, ['❄️']], 
-      [/火|炎|焰|熔|熱|熾|燄/, ['🔥']],
-      [/電|雷|閃電|電擊/, ['⚡']],
-      [/果|蘋果/, ['🍎']],
-      [/葡萄/, ['🍇']],
-      [/鳥|鷹|隼/, ['🦅']],
-      [/鴨|鵝|雁/, ['🦆']],
-      [/蛇|蟒/, ['🐍']],
-      [/龜|海龜/, ['🐢']],
-      [/蜥|蜥蜴/, ['🦎']],
-      [/蛙|青蛙|蟾蜍/, ['🐸']],
-      [/鶴/, ['🐦']],
-      [/鴿/, ['🕊️']],
-      [/雞|雛/, ['🐔']],
-      [/孔雀/, ['🦚']],
-      [/企鵝/, ['🐧']],
-      [/蕉/, ['🍌']],
-      [/橙|橘|柑/, ['🍊']],
-      [/莓/, ['🍓']],
-      [/風|颶|飄|氣|霧|煙/, ['💨']],
-      [/土|地|砂|石|山|岩|礦|磚|泥|塵/, ['🪨']],
-      [/金屬|金|鋼|鐵|銅|銀|機|齒|械|裝甲|裝備/, ['⚙️']],
-      [/馬|駒/, ['🐎']],
-      [/牛|犢/, ['🐂']],
-      [/羊|羔/, ['🐑']],
-      [/豬|豚/, ['🐖']],
-      [/犬|狗|獵犬|狼/, ['🐺']],
-      [/貓|獅|虎|豹/, ['🐈']],
-      [/熊/, ['🐻']],
-      [/猴|猿/, ['🐒']],
-      [/蝙蝠/, ['🦇']],
-      [/兔/, ['🐇']],
-      [/象|長鼻/, ['🐘']],
-      [/時間|時|鐘|歲|古|化石|紀元|秒|分/, ['⌛️']],
-      [/龍|獸|怪|神/, ['🐉']],
-      [/怪獸|巨怪|妖/, ['👹']],
-      [/鳳凰|鳳/, ['🐦‍🔥']],
-      [/魚/, ['🐟']],
-      [/鯊/, ['🦈']],
-      [/鯨/, ['🐋']],
-      [/海豚/, ['🐬']],
-      [/章魚/, ['🐙']],
-      [/魷/, ['🦑']],
-      [/蝦/, ['🦐']],
-      [/蟹/, ['🦀']],
-      [/海星/, ['⭐']],
-      [/巫|法師/, ['🧙🏻']],
-      [/靈|魂|魄/, ['👻']],
-      [/魔|咒|幻|術|法|符/, ['🪄']],
-      [/生|生命|植物|草|芽|藤|葉|苗/, ['🌱']],
-      [/劍|刀|刃|短劍|長劍|匕首|武士刀|雙刀|巨劍/, ['🗡️']],
-      [/斧|戰斧|手斧|雙刃斧/, ['🪓']],
-      [/鎚|錘|戰錘|大鎚|榔頭/, ['🔨']],
-      [/弓|弓箭|長弓|短弓|弩|十字弓/, ['🏹']],
-      [/矛|長槍|長矛|標槍|戟|槍刃/, ['🗡️']],
-      [/盾|防盾|護盾/, ['🛡️']],
-      [/飛鏢|手裡劍|擲斧|投石/, ['🎯']],
-      [/手槍|步槍|狙擊槍|獵槍|霰彈槍|槍械/, ['🔫']],
-      [/砲|炮|火砲|大砲|加農炮|迫擊砲/, ['💣']],
-      [/鎬|稿|鎬子|十字鎬|挖礦/, ['⛏️']],
-      [/鏟|鐵鍬|鐵鏟|鏟子|鍬/, ['🧹']],
-      [/鋸|鋸子/, ['🪚']],
-      [/扳手|板手|套筒|梅花扳手/, ['🔧']],
-      [/螺絲起子|起子|螺起/, ['🪛']],
-      [/工具箱|工具包/, ['🧰']],
-    ];
+// 在 seedRecipes 後面加
+const normPair = (a,b) => [a,b].sort().join('+');
+const seedMap = {};
+for (const [k, v] of Object.entries(seedRecipes)) {
+  const [a, b] = k.split('+');
+  seedMap[normPair(a, b)] = v; // v 形如 ['泥',['🟤']]
+}
+const resultEmojiMap = {};
+for (const [k, v] of Object.entries(seedRecipes)) {
+  const [name, emoji] = v;                 // v 形如 ['泥', ['🟤']]
+  resultEmojiMap[name] = Array.isArray(emoji) ? emoji : [emoji];
+}
+      const rules = [
+    [/黑洞|宇宙|銀河|星系|行星|恆星|星|彗星/, ['🪐']],
+    [/水|泉|雨|滴/, ['💧']],
+    [/海|潮|浪|洋/, ['🌊']],
+    [/河|湖/, ['🏞️']],             
+    [/樹|林|木|森|松|柏/, ['🌲']],
+    [/花|瓣|櫻|梅|菊|蓮|蘭/, ['🌸']],
+    [/蟲|幼蟲/, ['🐛']],
+    [/蝶/, ['🦋']],
+    [/甲蟲|鍬形蟲|金龜子/, ['🪲']],
+    [/蜂/, ['🐝']],
+    [/螞蟻|蟻/, ['🐜']],
+    [/蚊/, ['🦟']],
+    [/瓢蟲/, ['🐞']],
+    [/磁|磁鐵|磁場/, ['🧲']],
+    [/冰|結冰/, ['🧊']],
+    [/雪|霜|寒/, ['❄️']], 
+    [/火|炎|焰|熔|熱|熾|燄/, ['🔥']],
+    [/電|雷|閃電|電擊/, ['⚡']],
+    [/果|蘋果/, ['🍎']],
+    [/葡萄/, ['🍇']],
+    [/鳥|鷹|隼/, ['🦅']],
+    [/鴨|鵝|雁/, ['🦆']],
+    [/蛇|蟒/, ['🐍']],
+    [/龜|海龜/, ['🐢']],
+    [/蜥|蜥蜴/, ['🦎']],
+    [/蛙|青蛙|蟾蜍/, ['🐸']],
+    [/鶴/, ['🐦']],
+    [/鴿/, ['🕊️']],
+    [/雞|雛/, ['🐔']],
+    [/孔雀/, ['🦚']],
+    [/企鵝/, ['🐧']],
+    [/蕉/, ['🍌']],
+    [/橙|橘|柑/, ['🍊']],
+    [/莓/, ['🍓']],
+    [/風|颶|飄|氣|霧|煙/, ['💨']],
+    [/土|地|砂|石|山|岩|礦|磚|泥|塵/, ['🪨']],
+    [/金屬|金|鋼|鐵|銅|銀|機|齒|械|裝甲|裝備/, ['⚙️']],
+    [/馬|駒/, ['🐎']],
+    [/牛|犢/, ['🐂']],
+    [/羊|羔/, ['🐑']],
+    [/豬|豚/, ['🐖']],
+    [/犬|狗|獵犬|狼/, ['🐺']],
+    [/貓|獅|虎|豹/, ['🐈']],
+    [/熊/, ['🐻']],
+    [/猴|猿/, ['🐒']],
+    [/蝙蝠/, ['🦇']],
+    [/兔/, ['🐇']],
+    [/象|長鼻/, ['🐘']],
+    [/時間|時|鐘|歲|古|化石|紀元|秒|分/, ['⌛️']],
+    [/龍|獸|怪|神/, ['🐉']],
+    [/怪獸|巨怪|妖/, ['👹']],
+    [/鳳凰|鳳/, ['🐦‍🔥']],
+    [/魚/, ['🐟']],
+    [/鯊/, ['🦈']],
+    [/鯨/, ['🐋']],
+    [/海豚/, ['🐬']],
+    [/章魚/, ['🐙']],
+    [/魷/, ['🦑']],
+    [/蝦/, ['🦐']],
+    [/蟹/, ['🦀']],
+    [/海星/, ['⭐']],
+    [/巫|法師/, ['🧙🏻']],
+    [/靈|魂|魄/, ['👻']],
+    [/魔|咒|幻|術|法|符/, ['🪄']],
+    [/生|生命|植物|草|芽|藤|葉|苗/, ['🌱']],
+    [/劍|刀|刃|短劍|長劍|匕首|武士刀|雙刀|巨劍/, ['🗡️']],
+    [/斧|戰斧|手斧|雙刃斧/, ['🪓']],
+    [/鎚|錘|戰錘|大鎚|榔頭/, ['🔨']],
+    [/弓|弓箭|長弓|短弓|弩|十字弓/, ['🏹']],
+    [/矛|長槍|長矛|標槍|戟|槍刃/, ['🗡️']],
+    [/盾|防盾|護盾/, ['🛡️']],
+    [/飛鏢|手裡劍|擲斧|投石/, ['🎯']],
+    [/手槍|步槍|狙擊槍|獵槍|霰彈槍|槍械/, ['🔫']],
+    [/砲|炮|火砲|大砲|加農炮|迫擊砲/, ['💣']],
+    [/鎬|稿|鎬子|十字鎬|挖礦/, ['⛏️']],
+    [/鏟|鐵鍬|鐵鏟|鏟子|鍬/, ['🧹']], // 沒鏟子emoji暫用掃把
+    [/鋸|鋸子/, ['🪚']],
+    [/扳手|板手|套筒|梅花扳手/, ['🔧']],
+    [/螺絲起子|起子|螺起/, ['🪛']],
+    [/工具箱|工具包/, ['🧰']],
+  ];
     const emojiPool = ['🪐','✨','🧪','🧲','🧠','🎲','🧯','🛰️','🪄','📦','🛸','🧰','🎇','🔮','🗿','🧊','🧱','🌋','🌪️','🌊','🌌','🌈','🪵','🍞','🥚','🍰','🍫','☂️','🎺','⚗️','🧵','🧷','🧫','🪤','📡','🔧','🧭'];
-    function pickEmojiByName(name) {
-      if (!name) return [randomFrom(emojiPool)];
-      name = String(name).toLowerCase();
-      const found = [];
-      for (const [re, arr] of rules) {
-        if (found.length >= 3) break;
-        if (re.test(name)) {
-          const emo = Array.isArray(arr) ? arr[0] : arr;
-          if (!found.includes(emo)) found.push(emo);
-        }
-      }
-      return found.length ? found : [randomFrom(emojiPool)];
-    }
-    function randomFrom(arr) { return arr && arr.length ? arr[Math.floor(Math.random() * arr.length)] : '❓'; }
+function pickEmojiByName(name) {
+  if (!name) return [randomFrom(emojiPool)];
 
-    function generateName(a,b){
-      const classify = n => {
-        if(/火|焰|熔|熱/.test(n)) return 'fire';
-        if(/水|海|河|冰|雲|雨|霜/.test(n)) return 'water';
-        if(/風|氣|雲|霧|煙/.test(n)) return 'wind';
-        if(/土|石|山|岩|礦|磚|泥/.test(n)) return 'earth';
-        if(/龍|獸|鳥|魚|蟲/.test(n)) return 'creature';
-        if(/金|鋼|鐵|機|齒|械/.test(n)) return 'tech';
-        return 'other';
-      };
-      const ca = classify(a), cb = classify(b);
-      let name;
-      if(a === b){
-        const prefix = ca==='creature' ? '雙' : '雙';
-        name = prefix + a;
-      } else if((ca==='tech' && cb==='creature') || (cb==='tech' && ca==='creature')){
-        name = '賽博' + (ca==='creature'? a : b);
+  name = String(name).toLowerCase();
+  const found = [];
+  for (const [re, arr] of rules) {
+    if (found.length >= 3) break;
+    if (re.test(name)) {
+      const emo = Array.isArray(arr) ? arr[0] : arr;
+      if (!found.includes(emo)) found.push(emo);
+    }
+  }
+  return found.length ? found : [randomFrom(emojiPool)];
+}
+
+// 隨機保底
+function randomFrom(arr) {
+  return arr && arr.length ? arr[Math.floor(Math.random() * arr.length)] : '❓';
+}
+
+
+
+function generateName(a,b){
+  // semantic-ish naming
+  const classify = n => {
+    if(/火|焰|熔|熱/.test(n)) return 'fire';
+    if(/水|海|河|冰|雲|雨|霜/.test(n)) return 'water';
+    if(/風|氣|雲|霧|煙/.test(n)) return 'wind';
+    if(/土|石|山|岩|礦|磚|泥/.test(n)) return 'earth';
+    if(/龍|獸|鳥|魚|蟲/.test(n)) return 'creature';
+    if(/金|鋼|鐵|機|齒|械/.test(n)) return 'tech';
+    return 'other';
+  };
+  const ca = classify(a), cb = classify(b);
+  let name;
+  if(a === b){ // 只有在兩個元素完全相同時，才使用「雙XX」格式
+    const prefix = ca==='creature' ? '雙' : '雙';
+    name = prefix + a;
+  } else if((ca==='tech' && cb==='creature') || (cb==='tech' && ca==='creature')){
+    name = '賽博' + (ca==='creature'? a : b);
+  } else {
+    const templates = [
+      `${a}${b}`, `${a}之${b}`, `${b}-${a}`, `${a} ${b}`, `${a}${b}體`, `${a}·${b}`
+    ];
+    name = templates[Math.floor(Math.random()*templates.length)];
+  }
+  return name
+    .replace(/(.)\1\1+/g, '$1$1')
+    .replace(/(火)火/g, '雙火')
+    .replace(/(水)水/g, '雙水');
+}
+ function isApplePlatform() {
+  return /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
+}
+
+// 簡單的快取 Map：emoji -> <img> 節點
+const emojiImgCache = new Map();
+
+function makeCard(name, emojis, rare = false) {
+  const list = Array.isArray(emojis) ? emojis : [emojis];
+  const el = document.createElement('div');
+  el.className = 'card'
+  el.draggable = true;
+  el.dataset.name = name;
+
+  const emojiContainer = document.createElement('div');
+  emojiContainer.className = 'emoji-container';
+
+  list.forEach(emoji => {
+    const emojiEl = document.createElement('div');
+    emojiEl.className = 'emoji';
+
+    if (isApplePlatform()) {
+      // 蘋果平台直接用文字 emoji
+      emojiEl.textContent = emoji;
+    } else {
+      // 其他平台用快取的蘋果風格圖片
+      let imgNode;
+      if (emojiImgCache.has(emoji)) {
+        // 從快取複製節點
+        imgNode = emojiImgCache.get(emoji).cloneNode(true);
       } else {
-        const templates = [
-          `${a}${b}`, `${a}之${b}`, `${b}-${a}`, `${a} ${b}`, `${a}${b}體`, `${a}·${b}`
-        ];
-        name = templates[Math.floor(Math.random()*templates.length)];
+        // 新建圖片並存到快取
+        const img = document.createElement('img');
+        img.src = `https://emojicdn.elk.sh/${encodeURIComponent(emoji)}?style=apple&size=64`;
+        img.alt = emoji;
+        img.width = 28;
+        img.height = 28;
+        emojiImgCache.set(emoji, img);
+        imgNode = img.cloneNode(true);
       }
-      return name
-        .replace(/(.)\1\1+/g, '$1$1')
-        .replace(/(火)火/g, '雙火')
-        .replace(/(水)水/g, '雙水');
+      emojiEl.appendChild(imgNode);
     }
-    function isApplePlatform() { return /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent); }
 
-    // emoji 圖片快取
-    const emojiImgCache = new Map();
+    emojiContainer.appendChild(emojiEl);
+  });
 
-    function makeCard(name, emojis, rare = false) {
-      const list = Array.isArray(emojis) ? emojis : [emojis];
-      const el = document.createElement('div');
-      el.className = 'card';
-      el.draggable = false; // 關掉原生 DnD
-      el.dataset.name = name;
+  el.appendChild(emojiContainer);
 
-      const emojiContainer = document.createElement('div');
-      emojiContainer.className = 'emoji-container';
+  const nameEl = document.createElement('div');
+  nameEl.className = 'name';
+  nameEl.textContent = name;
+  el.appendChild(nameEl);
 
-      list.forEach(emoji => {
-        const emojiEl = document.createElement('div');
-        emojiEl.className = 'emoji';
+  return el;
+}
 
-        if (isApplePlatform()) {
-          emojiEl.textContent = emoji;
-        } else {
-          let imgNode;
-          if (emojiImgCache.has(emoji)) {
-            imgNode = emojiImgCache.get(emoji).cloneNode(true);
-          } else {
-            const img = document.createElement('img');
-            img.src = `https://emojicdn.elk.sh/${encodeURIComponent(emoji)}?style=apple&size=64`;
-            img.alt = emoji;
-            img.width = 28;
-            img.height = 28;
-            emojiImgCache.set(emoji, img);
-            imgNode = img.cloneNode(true);
-          }
-          emojiEl.appendChild(imgNode);
-        }
 
-        emojiContainer.appendChild(emojiEl);
-      });
+  
 
-      el.appendChild(emojiContainer);
-
-      const nameEl = document.createElement('div');
-      nameEl.className = 'name';
-      nameEl.textContent = name;
-      el.appendChild(nameEl);
-
-      return el;
-    }
 
     function toast(msg){
       const t = document.getElementById('toast');
@@ -487,13 +517,14 @@
       }
     }
     function playClick(){
-      try {
-        const audio = new Audio('click.ogg');
-        audio.play().catch(err => console.warn('click 音效播放被阻擋', err));
-      } catch (err) {
-        console.warn('播放 click.ogg 失敗', err);
-      }
-    }
+  try {
+    const audio = new Audio('click.ogg');
+    audio.play().catch(err => console.warn('click 音效播放被阻擋', err));
+  } catch (err) {
+    console.warn('播放 click.ogg 失敗', err);
+  }
+}
+
 
     // ---------- State ----------
     let state = loadState() || {
@@ -505,7 +536,7 @@
     };
 
     // seed base
-    for(const [n,e] of firstPool){ state.unlocked[n] = state.unlocked[n] || e; }
+   for(const [n,e] of firstPool){ state.unlocked[n] = state.unlocked[n] || e; }
     if(!state.missions || state.missions.length===0) regenMissions();
     saveState();
 
@@ -519,20 +550,19 @@
     const progressBar = document.getElementById('progressBar');
     const statsPill = document.getElementById('statsPill');
     const searchEl = document.getElementById('search');
-
-    function updateMissionProgress(){
-      const total = state.missions.length || 0;
-      const done = state.missions.filter(m => m.done).length;
-      const pct = total ? Math.round(done / total * 100) : 0;
-      progressBar.style.width = pct + '%';
-      progressBar.setAttribute('aria-valuenow', pct);
-    }
-
+function updateMissionProgress(){
+  const total = state.missions.length || 0;
+  const done = state.missions.filter(m => m.done).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  progressBar.style.width = pct + '%';
+  progressBar.setAttribute('aria-valuenow', pct);
+}
     function fuzzyMatch(hay, needle){
       if(!needle) return true;
       const s = hay.toLowerCase();
       const n = needle.toLowerCase().trim();
       if(s.includes(n)) return true;
+      // simple subsequence fuzzy: all chars appear in order
       let i=0; for(const ch of s){ if(ch===n[i]) i++; if(i===n.length) return true; }
       return false;
     }
@@ -545,12 +575,13 @@
       const frag = document.createDocumentFragment();
       for(const it of items){
         const c = makeCard(it.n,it.e);
-        c.addEventListener('pointerdown', ev=>{
-          startFakeDrag(ev, {name: it.n, emoji: it.e});
+        c.addEventListener('dragstart', ev=>{
+          ev.dataTransfer.setData('text/plain', JSON.stringify({name:it.n, emoji:it.e}));
         });
         frag.appendChild(c);
       }
       catalogEl.appendChild(frag);
+      // stats
       const total = Object.keys(state.unlocked).length;
       statsPill.textContent = `${total} 項`;
     }
@@ -585,139 +616,125 @@
       comboLogEl.appendChild(frag);
     }
 
-    function renderMissions(){
-      missionsEl.innerHTML = '';
-      for(const m of state.missions){
-        const row = document.createElement('div');
-        row.className = 'mission';
-        row.innerHTML = `<div class="emoji">${m.emoji.join('')}</div><div class="name ${m.done?'done':''}">${m.name}</div>`;
-        missionsEl.appendChild(row);
-      }
-      updateMissionProgress(); 
-    }
+// 2) 替換 renderMissions()，結尾呼叫任務進度更新
+function renderMissions(){
+  missionsEl.innerHTML = '';
+  for(const m of state.missions){
+    const row = document.createElement('div');
+    row.className = 'mission';
+    row.innerHTML = `<div class="emoji">${m.emoji.join('')}</div><div class="name ${m.done?'done':''}">${m.name}</div>`;
+    missionsEl.appendChild(row);
+  }
+  updateMissionProgress(); 
+}
+//regen toolset
+function getAllElementNames(){
+  // 以「看得到的宇宙」為基礎：配方結果 + 玩家已產生過的結果
+  const set = new Set();
 
-    function getAllElementNames(){
-      const set = new Set();
-      for (const r of Object.values(seedRecipes)) {
-        if (Array.isArray(r) && typeof r[0] === 'string') set.add(r[0]);
-      }
-      for (const k in (state.known || {})) {
-        const r = state.known[k];
-        if (r && typeof r.name === 'string') set.add(r.name);
-      }
-      return [...set];
-    }
+  // 配方結果（正史池）
+  for (const r of Object.values(seedRecipes)) {
+    if (Array.isArray(r) && typeof r[0] === 'string') set.add(r[0]);
+  }
+  // 玩家曾經產生過（包含 new discover）
+  for (const k in (state.known || {})) {
+    const r = state.known[k];
+    if (r && typeof r.name === 'string') set.add(r.name);
+  }
+  return [...set];
+}
 
-    function eligibleMissionPool(){
-      const unlocked = new Set(Object.keys(state.unlocked || {}));
-      const current  = new Set((state.missions || []).map(m => m.name));
-      return getAllElementNames().filter(n => !unlocked.has(n) && !current.has(n));
-    }
+function eligibleMissionPool(){
+  const unlocked = new Set(Object.keys(state.unlocked || {}));
+  const current  = new Set((state.missions || []).map(m => m.name));
+  return getAllElementNames().filter(n => !unlocked.has(n) && !current.has(n));
+}
 
-    function pickEligibleMission(){
-      const pool = eligibleMissionPool();
-      if (!pool.length) return null;
-      return pool[Math.floor(Math.random() * pool.length)];
-    }
+function pickEligibleMission(){
+  const pool = eligibleMissionPool();
+  if (!pool.length) return null;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
-    function regenMissions(count = 3, { force = false } = {}) {
-      state.missions = Array.isArray(state.missions) ? state.missions : [];
-      state.missions = force ? [] : state.missions.filter(m => m && !m.done);
-      let added = 0;
-      while (state.missions.length < count) {
-        const next = pickEligibleMission();
-        if (!next) break;
-        state.missions.push({
-          name: next,
-          emoji: Array.isArray(state.unlocked[next]) ? state.unlocked[next]
-               : (resultEmojiMap[next] || pickEmojiByName(next)),
-          done: false
-        });
-        added++;
-      }
-      return added;
-    }
+
+
+// 替換原本的 regenMissions()
+function regenMissions(count = 3, { force = false } = {}) {
+  state.missions = Array.isArray(state.missions) ? state.missions : [];
+  // force=true：清空；否則只保留未完成
+  state.missions = force ? [] : state.missions.filter(m => m && !m.done);
+
+  let added = 0;
+  while (state.missions.length < count) {
+    const next = pickEligibleMission();
+    if (!next) break;
+    state.missions.push({
+      name: next,
+      emoji: Array.isArray(state.unlocked[next]) ? state.unlocked[next]
+           : (resultEmojiMap[next] || pickEmojiByName(next)),
+      done: false
+    });
+    added++;
+  }
+  return added;
+}
+
+
+
 
     // ---------- Reset Logic ----------
-    function hardReset(){
-      try {
-        localStorage.setItem(LS_KEY, '');
-        localStorage.removeItem(LS_KEY);
-      } catch {}
-      state = {
-        version: SAVE_VERSION,
-        known: {},
-        unlocked: {},
-        history: [],
-        missions: []
-      };
-      for (const [n, e] of firstPool) { state.unlocked[n] = e; }
-      regenMissions();
-      saveState();
-      try { document.getElementById('workspace').innerHTML = ''; } catch {}
-      renderAll();
-      toast('已重置');
-      try { localStorage.removeItem('iec_seen_intro_v2'); } catch {}
-    }
+function hardReset(){
+  try {
+    localStorage.setItem(LS_KEY, '');
+    localStorage.removeItem(LS_KEY);
+  } catch {}
+  state = {
+    version: SAVE_VERSION,
+    known: {},
+    unlocked: {},
+    history: [],
+    missions: []
+  };
+  // 只保留初始基礎元素
+  for (const [n, e] of firstPool) {
+    state.unlocked[n] = e;
+  }
+  regenMissions();
+  saveState();
+  // 清空暫存 UI
+  try {
+    document.getElementById('workspace').innerHTML = '';
+  } catch {}
+  renderAll();
+  toast('已重置');
+  try { localStorage.removeItem('iec_seen_intro_v2'); } catch {}
+}
 
-    // ---------- Fake Drag & Drop (取代原生) ----------
-    let pending = []; // 與原本 combine 流程共用
-    let dragging = null; // { data, ghostEl }
-    const appEl = document.querySelector('.app');
 
-    function startFakeDrag(e, data){
-      e.preventDefault();
-      const g = document.createElement('div');
-      g.className = 'drag-ghost';
-      g.appendChild(makeCard(data.name, data.emoji));
-      document.body.appendChild(g);
+    // ---------- Workspace Drag & Combine ----------
+    let pending = [];
 
-      dragging = { data, ghostEl: g };
-      appEl.classList.add('dragging');
-      updateGhost(e.clientX, e.clientY);
+    dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.style.borderColor = '#3b82f6'; });
+    dropzone.addEventListener('dragleave', ()=>{ dropzone.style.borderColor = '#2a3250'; });
 
-      window.addEventListener('pointermove', onMove);
-      window.addEventListener('pointerup', onUp, { once: true });
-    }
-
-    function onMove(e){
-      if(!dragging) return;
-      updateGhost(e.clientX, e.clientY);
-    }
-
-    function updateGhost(x, y){
-      if(!dragging) return;
-      const g = dragging.ghostEl;
-      g.style.left = x + 'px';
-      g.style.top  = y + 'px';
-    }
-
-    function onUp(e){
-      if(!dragging) return;
-      const { data, ghostEl } = dragging;
-      const inDrop = isInside(dropzone, e.clientX, e.clientY);
-
-      ghostEl.remove();
-      dragging = null;
-      appEl.classList.remove('dragging');
-      window.removeEventListener('pointermove', onMove);
-
-      if(!inDrop) return;
+    dropzone.addEventListener('drop', e=>{
+      e.preventDefault(); dropzone.style.borderColor = '#2a3250';
+      const raw = e.dataTransfer.getData('text/plain');
+      const parsed = safeParseJSON(raw);
+      if(!parsed.ok || !parsed.val){ toast('拖放資料格式錯誤'); return; }
+      const data = parsed.val;
+      if (typeof data.name !== 'string' || !Array.isArray(data.emoji)) {
+  toast('拖放資料缺少欄位'); return;
+}
 
       const rect = workspace.getBoundingClientRect();
       spawnToken(data.name, data.emoji, e.clientX - rect.left, e.clientY - rect.top);
-
       pending.push(data);
       if(pending.length>=2){
         const [a,b] = pending.splice(0,2);
-        combine(a,b, e.clientX - rect.left, e.clientY - rect.top);
+        combine(a,b,e.clientX - rect.left, e.clientY - rect.top);
       }
-    }
-
-    function isInside(el, cx, cy){
-      const r = el.getBoundingClientRect();
-      return cx >= r.left && cx <= r.right && cy >= r.top && cy <= r.bottom;
-    }
+    });
 
     function spawnToken(name, emoji, x,y){
       const t = document.createElement('div');
@@ -727,77 +744,86 @@
       return t;
     }
 
-    function combine(a,b,x,y){
-      document.querySelectorAll('.token').forEach(el => el.remove());
+ function combine(a,b,x,y){
 
-      if (!Array.isArray(a.emoji)) a.emoji = [a.emoji];
-      if (!Array.isArray(b.emoji)) b.emoji = [b.emoji];
+  document.querySelectorAll('.token').forEach(el => el.remove());
 
-      const key = normPair(a.name,b.name);
-      let res = state.known[key];
-      let isNew = false; let rare = false;
+  if (!Array.isArray(a.emoji)) a.emoji = [a.emoji];
+  if (!Array.isArray(b.emoji)) b.emoji = [b.emoji];
 
-      if (!res) {
-        const seed = seedMap[key];
-        if (seed) {
-          const [name, emoji] = seed;
-          res = { name, emoji };
-        }
-      }
+  const key = normPair(a.name,b.name);
+  let res = state.known[key];
+  let isNew = false; let rare = false;
 
-      if(!res){
-        const name = generateName(a.name,b.name);
-        const emoji = pickEmojiByName(name);
-        res = {name, emoji};
-      }
-
-      state.known[key] = res;
-      if(!state.unlocked[res.name]){ state.unlocked[res.name]=res.emoji; isNew = true; }
-      rare = Math.random()<0.06;
-
-      const productToken = spawnToken(
-        res.name,
-        res.emoji,
-        x + (Math.random() * 40 - 20),
-        y + (Math.random() * 20 - 10)
-      );
-      spark(x,y,workspace);
-      setTimeout(() => { if (productToken) productToken.classList.add('fade-out'); }, 1450);
-      setTimeout(() => { if (productToken) productToken.remove(); }, 1700);
-
-      state.history.push({a,b,res});
-
-      for (const m of state.missions) {
-        if (!m.done && m.name === res.name) {
-          m.done = true;
-          toast(`任務完成：${m.name} ${m.emoji.join('')}`);
-        }
-      }
-      const allDone = state.missions.length > 0 && state.missions.every(m => m.done);
-      if (allDone) { regenMissions(); }
-
-      saveState();
-      renderBook(); renderHistory(); renderCatalog(searchEl.value.trim()); renderMissions();
-
-      try {
-        const audio = new Audio('newthing.flac');
-        audio.play().catch(err => console.warn('音效播放被阻擋', err));
-      } catch (err) {
-        console.warn('播放 newthing.flac 失敗', err);
-      }
-      toast(isNew? `New Discover：${res.name} ${res.emoji.join('')}` : `合成成功：${res.name} ${res.emoji.join('')}`);
+  // ← 新增：優先吃 seed 配方
+  if (!res) {
+    const seed = seedMap[key];
+    if (seed) {
+      const [name, emoji] = seed;
+      res = { name, emoji };
     }
+  }
+
+  if(!res){
+    const name = generateName(a.name,b.name);
+    const emoji = pickEmojiByName(name);
+    res = {name, emoji};
+  }
+
+  // 紀錄 & 解鎖
+  state.known[key] = res;
+  if(!state.unlocked[res.name]){ state.unlocked[res.name]=res.emoji; isNew = true; }
+  rare = Math.random()<0.06;
+  const productToken = spawnToken(
+    res.name,
+    res.emoji,
+    x + (Math.random() * 40 - 20),
+    y + (Math.random() * 20 - 10)
+  );
+  spark(x,y,workspace);
+  setTimeout(() => {
+  if (productToken) productToken.classList.add('fade-out');
+}, 1450);
+  setTimeout(() => { if (productToken) productToken.remove(); }, 1700);
+  state.history.push({a,b,res});
+for (const m of state.missions) {
+  if (!m.done && m.name === res.name) {
+    m.done = true;
+    toast(`任務完成：${m.name} ${m.emoji.join('')}`);
+  }
+}
+// 全組完成才自動重擲
+const allDone = state.missions.length > 0 && state.missions.every(m => m.done);
+if (allDone) {
+  regenMissions();              // 重新抽一整組（預設 3 個）
+}
+
+
+  saveState();
+
+  renderBook(); renderHistory(); renderCatalog(searchEl.value.trim()); renderMissions();
+
+    try {
+    const audio = new Audio('newthing.flac');
+    audio.play().catch(err => console.warn('音效播放被阻擋', err));
+  } catch (err) {
+    console.warn('播放 newthing.flac 失敗', err);
+  }
+  toast(isNew? `New Discover：${res.name} ${res.emoji.join('')}` : `合成成功：${res.name} ${res.emoji.join('')}`);
+}
+
+       
 
     // ---------- Controls ----------
     function debounce(fn, ms){ let h; return (...a)=>{ clearTimeout(h); h=setTimeout(()=>fn(...a), ms); }; }
     searchEl.addEventListener('input', debounce(()=>{ renderCatalog(searchEl.value.trim()); }, 80));
+document.getElementById('rerollMissions').addEventListener('click', ()=>{
+  const added = regenMissions(3, { force: true }); // ← 關鍵
+  saveState();
+  renderMissions();
+  toast(added > 0 ? '已重擲任務' : '沒有可重擲的任務');
+});
 
-    document.getElementById('rerollMissions').addEventListener('click', ()=>{
-      const added = regenMissions(3, { force: true });
-      saveState();
-      renderMissions();
-      toast(added > 0 ? '已重擲任務' : '沒有可重擲的任務');
-    });
 
     document.getElementById('exportBtn').addEventListener('click', ()=>{
       playClick();
@@ -823,6 +849,7 @@
       inp.click();
     });
 
+    // safer two-tap confirm (some sandboxes block window.confirm)
     (function installReset(){
       const resetBtn = document.getElementById('resetBtn');
       let armTimer = null;
@@ -847,108 +874,140 @@
         if(!resetBtn.dataset.armed){ arm(); return; }
         clearTimeout(armTimer); disarm(); hardReset();
       });
+      // keyboard friendly
       resetBtn.addEventListener('keydown', (e)=>{
         if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); resetBtn.click(); }
         playClick();
       });
     })();
-
     function renderAll(){
       renderCatalog(); renderBook(); renderHistory(); renderMissions();
       document.getElementById('ver').textContent = SAVE_VERSION;
     }
     try{ renderAll(); } catch(e){ console.error('render error', e); toast('初始化失敗'); }
+// --- Opening Cutscene: "Was that Infinite?" v1.1 ---
+// 直接貼在你的 <script> 最底下（renderAll() 之後即可）
 
-    // --- Opening Cutscene: "Was that Infinite?" v1.1 ---
-    (function installOpening(){
-      const INTRO_KEY = 'iec_seen_intro_v2';
-      try { if (localStorage.getItem(INTRO_KEY)) return; } catch {}
-      const intro   = document.getElementById('intro');
-      const textEl  = document.getElementById('introText');
-      if(!intro || !textEl) return;
+(function installOpening(){
+  const INTRO_KEY = 'iec_seen_intro_v2';
+  // 已看過就略過
+  try { if (localStorage.getItem(INTRO_KEY)) return; } catch {}
 
-      const frames = [
-        { t: '在很久以後的某天，一個高等文明的實驗室裡，某次不該失敗的維度展開實驗失敗了。', hold: 2500 },
-        { t: '整個三級維度宇宙被壓縮為無數的「元素」。', hold: 2500 },
-        { t: '你和這間破碎的實驗室是唯一沒被化為元素的實體物質。', hold: 2500 },
-        { t: '你必須不斷合成，重新拼回維度與宇宙。', hold: 2500 },
-        { t: '合成機／操作介面　連線中…', hold: 2500 },
-        { t: '載入基礎元素………載入完成。', hold: 2500 },
-        { t: '準備就緒。', hold: 2500 },
-      ];
-      const bgm = document.getElementById('introBgm');
+  const intro   = document.getElementById('intro');
+  const textEl  = document.getElementById('introText');
+  if(!intro || !textEl) return;
 
-      function playBgm(){
-        if (!bgm) return;
-        bgm.currentTime = 0; bgm.volume = 0;
-        bgm.play().catch(()=>{});
-        let v = 0;
-        const fade = setInterval(()=>{
-          v += 0.05;
-          if(v >= 0.4){ v = 0.4; clearInterval(fade); }
-          bgm.volume = v;
-        }, 120);
-      }
+  const frames = [
+    { t: '在很久以後的某天，一個高等文明的實驗室裡，某次不該失敗的維度展開實驗失敗了。', hold: 2500 },
+    { t: '整個三級維度宇宙被壓縮為無數的「元素」。', hold: 2500 },
+    { t: '你和這間破碎的實驗室是唯一沒被化為元素的實體物質。', hold: 2500 },
+    { t: '你必須不斷合成，重新拼回維度與宇宙。', hold: 2500 },
+    { t: '合成機／操作介面　連線中…', hold: 2500 },
+    { t: '載入基礎元素………載入完成。', hold: 2500 },
+    { t: '準備就緒。', hold: 2500 },
+  ];
+  const bgm = document.getElementById('introBgm');
 
-      function stopBgm(){
-        if (!bgm) return;
-        let v = bgm.volume;
-        const fade = setInterval(()=>{
-          v -= 0.05;
-          if(v <= 0){ v = 0; clearInterval(fade); bgm.pause(); }
-          bgm.volume = v;
-        }, 120);
-      }
+  function playBgm(){
+    if (!bgm) return;
+    bgm.currentTime = 0;
+    bgm.volume = 0;
+    bgm.play().catch(()=>{});
+    // 漸入
+    let v = 0;
+    const fade = setInterval(()=>{
+      v += 0.05;
+      if(v >= 0.4){ v = 0.4; clearInterval(fade); }
+      bgm.volume = v;
+    }, 120);
+  }
 
-      function typeLine(str, speed = 65){
-        return new Promise(resolve=>{
-          let i = 0, out = '';
-          const id = setInterval(()=>{
-            out += str[i++];
-            textEl.textContent = out;
-            if(i >= str.length){
-              clearInterval(id);
-              resolve();
-            }
-          }, speed);
-        });
-      }
+  function stopBgm(){
+    if (!bgm) return;
+    // 漸出
+    let v = bgm.volume;
+    const fade = setInterval(()=>{
+      v -= 0.05;
+      if(v <= 0){ v = 0; clearInterval(fade); bgm.pause(); }
+      bgm.volume = v;
+    }, 120);
+  }
 
-      function showOverlay(){
-        intro.classList.remove('hidden');
-        void intro.offsetHeight;
-        intro.classList.remove('fade');
-      }
-
-      function hideOverlay(){
-        intro.classList.add('fade');
-        setTimeout(()=> intro.classList.add('hidden'), 750);
-      }
-
-      (async function run(){
-        playBgm();
-        showOverlay();
-        try {
-          const hint = document.createElement('div');
-          hint.style.position='absolute';
-          hint.style.bottom='18px';
-          hint.style.left='50%';
-          hint.style.transform='translateX(-50%)';
-          hint.style.fontSize='12px';
-          hint.style.opacity='.65';
-          intro.querySelector('.intro-inner')?.appendChild(hint);
-        } catch {}
-
-        for(const f of frames){
-          await typeLine(f.t);
-          await new Promise(r=> setTimeout(r, f.hold||800));
-          textEl.textContent = textEl.textContent + '\n';
+  // 打字機
+  function typeLine(str, speed = 65){
+    return new Promise(resolve=>{
+      let i = 0, out = '';
+      const id = setInterval(()=>{
+        out += str[i++];
+        textEl.textContent = out;
+        if(i >= str.length){
+          clearInterval(id);
+          resolve();
         }
-        try { localStorage.setItem(INTRO_KEY, '1'); } catch {}
-        hideOverlay();
-        stopBgm();
-      })();
-    })();
+      }, speed);
+    });
+  }
+
+  // 淡入容器
+  function showOverlay(){
+    intro.classList.remove('hidden');
+    // 觸發重繪以啟用過場
+    void intro.offsetHeight;
+    intro.classList.remove('fade');
+  }
+
+  function hideOverlay(){
+    intro.classList.add('fade');
+    setTimeout(()=> intro.classList.add('hidden'), 750);
+  }
+
+  // 執行片頭
+  (async function run(){
+    playBgm();
+    showOverlay();
+    // 小提示（不干擾）
+    try {
+      const hint = document.createElement('div');
+      hint.style.position='absolute';
+      hint.style.bottom='18px';
+      hint.style.left='50%';
+      hint.style.transform='translateX(-50%)';
+      hint.style.fontSize='12px';
+      hint.style.opacity='.65';
+      intro.querySelector('.intro-inner')?.appendChild(hint);
+    } catch {}
+
+    for(const f of frames){
+      await typeLine(f.t);
+      await new Promise(r=> setTimeout(r, f.hold||800));
+      textEl.textContent = textEl.textContent + '\n';
+    }
+    try { localStorage.setItem(INTRO_KEY, '1'); } catch {}
+    hideOverlay();
+    stopBgm()
+  })();
+})();
+// --- custom cursor state ---
+(function installCustomCursor(){
+  const app = document.querySelector('.app');
+  if(!app) return;
+
+  // 只要拖一張卡就進入 dragging 狀態
+  document.addEventListener('dragstart', e=>{
+    const target = e.target;
+    if(target && target.closest && target.closest('.card')){
+      app.classList.add('dragging');
+    }
+  });
+
+  const clearDrag = ()=> app.classList.remove('dragging');
+  document.addEventListener('dragend', clearDrag);
+  document.addEventListener('drop', clearDrag);
+  document.addEventListener('mouseleave', e=>{
+    // 偶發卡住時保險解除
+    if(e.relatedTarget == null) clearDrag();
+  });
+})();
 
   </script>
 </body>
