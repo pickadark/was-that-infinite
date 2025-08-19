@@ -786,6 +786,9 @@ function hardReset(){
 }, 1450);
   setTimeout(() => { if (productToken) productToken.remove(); }, 1700);
   state.history.push({a,b,res});
+  if (state.history.length > 35) {
+    state.history.splice(0, 10);
+  }
 for (const m of state.missions) {
   if (!m.done && m.name === res.name) {
     m.done = true;
