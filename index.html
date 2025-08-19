@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Was that Infinite? — Local Prototype</title>
   <style>
+    @font-face{
+  font-family:'GlowSansTC';
+  src:url('GlowSansTC-subset.woff2') format('woff2');
+  font-weight:100 900;
+  font-style:normal;
+  font-display:swap;
+}
     :root{
       --bg:#0f1115; --panel:#141823; --card:#1a2030; --muted:#9aa0a6; --fg:#e9eef5; --accent:#6dd5fa; --accent2:#7f53ac;
       --good:#19c37d; --warn:#ffb020; --bad:#ff5d5d; --glow:0 0 0 1px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.45);
@@ -119,6 +126,9 @@ body{ cursor: var(--cursor-normal); }
 .dropzone{ cursor: var(--cursor-normal); }
 .app.dragging .dropzone{ cursor: var(--cursor-drag) !important; }
 .token{ cursor: inherit; }
+.intro, .intro * {
+  font-family: 'GlowSansTC' sans-serif;
+}
 
 
   </style>
