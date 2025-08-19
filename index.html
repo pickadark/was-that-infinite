@@ -889,7 +889,6 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
     }
     try{ renderAll(); } catch(e){ console.error('render error', e); toast('初始化失敗'); }
 // --- Opening Cutscene: "Was that Infinite?" v1.1 ---
-// 直接貼在你的 <script> 最底下（renderAll() 之後即可）
 
 (function installOpening(){
   const INTRO_KEY = 'iec_seen_intro_v2';
