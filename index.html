@@ -104,7 +104,23 @@
     #testPanel summary{cursor:pointer;color:#9cc0ff}
       /* armed reset visual */
     #resetBtn.armed{ border-color:#ff4d4f !important; background:linear-gradient(135deg, rgba(255,77,79,.18), rgba(255,77,79,.08)); color:#ffecec }
-    
+    :root{
+  --cursor-normal: url("cursor-normal.png") 8 8, auto;   /* 換你的圖與熱區 */
+  --cursor-drag:   url("cursor-drag.png") 10 10, grabbing;
+}
+
+/* 預設游標 */
+body{ cursor: var(--cursor-normal); }
+
+/* 拖曳中（由 JS 切換 .dragging） */
+.app.dragging, .app.dragging *{ cursor: var(--cursor-drag) !important; }
+
+/* 在放置區上方也保持拖曳樣式，避免被瀏覽器抓走 */
+.dropzone{ cursor: var(--cursor-normal); }
+.app.dragging .dropzone{ cursor: var(--cursor-drag) !important; }
+.token{ cursor: inherit; }
+
+
   </style>
 </head>
 <body>
@@ -970,6 +986,27 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
     hideOverlay();
     stopBgm()
   })();
+})();
+// --- custom cursor state ---
+(function installCustomCursor(){
+  const app = document.querySelector('.app');
+  if(!app) return;
+
+  // 只要拖一張卡就進入 dragging 狀態
+  document.addEventListener('dragstart', e=>{
+    const target = e.target;
+    if(target && target.closest && target.closest('.card')){
+      app.classList.add('dragging');
+    }
+  });
+
+  const clearDrag = ()=> app.classList.remove('dragging');
+  document.addEventListener('dragend', clearDrag);
+  document.addEventListener('drop', clearDrag);
+  document.addEventListener('mouseleave', e=>{
+    // 偶發卡住時保險解除
+    if(e.relatedTarget == null) clearDrag();
+  });
 })();
 
   </script>
