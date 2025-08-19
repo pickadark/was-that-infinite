@@ -918,7 +918,7 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
   }
 
   // 打字機
-  function typeLine(str, speed = 14){
+  function typeLine(str, speed = 65){
     return new Promise(resolve=>{
       let i = 0, out = '';
       const id = setInterval(()=>{
@@ -958,7 +958,6 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
       hint.style.transform='translateX(-50%)';
       hint.style.fontSize='12px';
       hint.style.opacity='.65';
-      hint.textContent='點擊或按空白/ESC 跳過';
       intro.querySelector('.intro-inner')?.appendChild(hint);
     } catch {}
 
