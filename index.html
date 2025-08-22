@@ -535,13 +535,46 @@ function makeCard(name, emojis, rare = false) {
         setTimeout(()=>s.remove(), 900);
       }
     }
-    function playClick(){
-  try {
-    const audio = new Audio('click.ogg');
-    audio.play().catch(err => console.warn('click 音效播放被阻擋', err));
-  } catch (err) {
-    console.warn('播放 click.ogg 失敗', err);
+    // 音效管理系統
+class AudioPool {
+  constructor() {
+    this.pools = new Map();
+    this.init();
   }
+  
+  init() {
+    this.createPool('click', 'click.ogg', 3);
+    this.createPool('combine', 'newthing.flac', 2);
+  }
+  
+  createPool(name, src, size) {
+    const pool = [];
+    for(let i = 0; i < size; i++) {
+      const audio = new Audio(src);
+      audio.volume = 0.7;
+      audio.preload = 'auto';
+      pool.push(audio);
+    }
+    this.pools.set(name, pool);
+  }
+  
+  play(name) {
+    const pool = this.pools.get(name);
+    if (!pool) return;
+    
+    // 找到空閒的音效實例
+    const audio = pool.find(a => a.paused || a.ended || a.currentTime === 0);
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play().catch(() => {});
+    }
+  }
+}
+
+const audioPool = new AudioPool();
+
+function playClick() {
+  audioPool.play('click');
 }
 
 
@@ -856,12 +889,7 @@ if (allDone) {
 
   renderBook(); renderHistory(); renderCatalog(searchEl.value.trim()); renderMissions();
 
-    try {
-    const audio = new Audio('newthing.flac');
-    audio.play().catch(err => console.warn('音效播放被阻擋', err));
-  } catch (err) {
-    console.warn('播放 newthing.flac 失敗', err);
-  }
+  audioPool.play('combine');
   toast(isNew? `New Discover：${res.name} ${res.emoji.join('')}` : `合成成功：${res.name} ${res.emoji.join('')}`);
 }
 
