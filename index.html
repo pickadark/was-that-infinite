@@ -587,23 +587,53 @@ function updateMissionProgress(){
     }
 
     function renderCatalog(filter=''){
-      catalogEl.innerHTML = '';
-      const items = Object.entries(state.unlocked).map(([n,e])=>({n,e}))
-        .filter(x=>fuzzyMatch(x.n, filter))
-        .sort((a,b)=>a.n.localeCompare(b.n,'zh-Hant'));
-      const frag = document.createDocumentFragment();
-      for(const it of items){
-        const c = makeCard(it.n,it.e);
-        c.addEventListener('dragstart', ev=>{
-          ev.dataTransfer.setData('text/plain', JSON.stringify({name:it.n, emoji:it.e}));
-        });
-        frag.appendChild(c);
-      }
-      catalogEl.appendChild(frag);
-      // stats
-      const total = Object.keys(state.unlocked).length;
-      statsPill.textContent = `${total} 項`;
+  const items = Object.entries(state.unlocked)
+    .map(([n,e]) => ({n,e}))
+    .filter(x => fuzzyMatch(x.n, filter))
+    .sort((a,b) => a.n.localeCompare(b.n,'zh-Hant'));
+  
+  updateCatalogItems(items);
+  
+  // stats - 使用 requestAnimationFrame 避免阻塞
+  requestAnimationFrame(() => {
+    const total = Object.keys(state.unlocked).length;
+    statsPill.textContent = `${total} 項`;
+  });
+}
+
+function updateCatalogItems(items) {
+  const existingCards = new Map();
+  
+  // 收集現有卡片
+  catalogEl.querySelectorAll('.card').forEach(card => {
+    const name = card.dataset.name;
+    if (name) existingCards.set(name, card);
+  });
+  
+  // 創建需要的卡片集合
+  const neededCards = new Set(items.map(item => item.n));
+  existingCards.forEach((card, name) => {
+    if (!neededCards.has(name)) {
+      card.remove();
+      existingCards.delete(name);
     }
+  });
+  const fragment = document.createDocumentFragment();
+  items.forEach(item => {
+    let card = existingCards.get(item.n);
+    
+    if (!card) {
+      card = makeCard(item.n, item.e);
+      card.addEventListener('dragstart', ev => {
+        ev.dataTransfer.setData('text/plain', JSON.stringify({name: item.n, emoji: item.e}));
+      });
+    }
+    
+    fragment.appendChild(card);
+  });
+  
+  catalogEl.appendChild(fragment);
+}
 
     function renderBook(){
       bookEl.innerHTML = '';
@@ -835,7 +865,7 @@ if (allDone) {
 
     // ---------- Controls ----------
     function debounce(fn, ms){ let h; return (...a)=>{ clearTimeout(h); h=setTimeout(()=>fn(...a), ms); }; }
-    searchEl.addEventListener('input', debounce(()=>{ renderCatalog(searchEl.value.trim()); }, 80));
+    searchEl.addEventListener('input', debounce(()=>{ renderCatalog(searchEl.value.trim()); }, 110));
 document.getElementById('rerollMissions').addEventListener('click', ()=>{
   const added = regenMissions(3, { force: true }); // ← 關鍵
   saveState();
