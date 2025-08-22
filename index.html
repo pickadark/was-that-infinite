@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
+  <script src="safefile.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Was that Infinite? — Local Prototype</title>
@@ -893,29 +894,67 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
 });
 
 
-    document.getElementById('exportBtn').addEventListener('click', ()=>{
-      playClick();
-      const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download='iec_save.json'; a.click(); URL.revokeObjectURL(url);
-      toast('已匯出存檔');
-    });
+    document.getElementById('exportBtn').addEventListener('click', async ()=>{
+  playClick();
+  
+  const result = await SafeFile.export(state);
+  if (!result.success) {
+    toast('匯出失敗：' + result.error);
+    return;
+  }
+  
+  const blob = new Blob([JSON.stringify(result.data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); 
+  a.href = url; 
+  a.download = 'wti_safe_save.json'; 
+  a.click(); 
+  URL.revokeObjectURL(url);
+  
+  toast(`已安全匯出存檔`);
+});
 
     document.getElementById('importBtn').addEventListener('click', ()=>{
-      playClick();
-      const inp = document.createElement('input'); inp.type='file'; inp.accept='application/json';
-      inp.onchange = ev => {
-        const f = ev.target.files[0]; if(!f) return;
-        const reader = new FileReader(); reader.onload = () => {
-          const parsed = safeParseJSON(reader.result);
-          if(!parsed.ok){ toast('讀取失敗：JSON 格式錯誤'); return; }
-          const obj = parsed.val;
-          if(validateState(obj)){ state = obj; saveState(); renderAll(); toast('匯入成功'); }
-          else toast('格式錯誤或缺少必要欄位');
-        }; reader.readAsText(f);
-      };
-      inp.click();
-    });
+  playClick();
+  const inp = document.createElement('input'); 
+  inp.type = 'file'; 
+  inp.accept = 'application/json';
+  
+  inp.onchange = async ev => {
+    const f = ev.target.files[0]; 
+    if (!f) return;
+    
+    const reader = new FileReader(); 
+    reader.onload = async () => {
+      const parsed = safeParseJSON(reader.result);
+      if (!parsed.ok) { 
+        toast('讀取失敗：JSON 格式錯誤'); 
+        return; 
+      }
+      
+      const result = await SafeFile.import(parsed.val);
+      if (!result.success) {
+        // 嘗試作為舊格式匯入
+        if (validateState(parsed.val)) {
+          state = parsed.val; 
+          saveState(); 
+          renderAll(); 
+          toast('以相容模式匯入成功');
+        } else {
+          toast('匯入失敗：' + result.reason);
+        }
+        return;
+      }
+      
+      state = result.data; 
+      saveState(); 
+      renderAll(); 
+      toast(`安全匯入成功`);
+    }; 
+    reader.readAsText(f);
+  };
+  inp.click();
+});
 
     // safer two-tap confirm (some sandboxes block window.confirm)
     (function installReset(){
@@ -1044,7 +1083,7 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
 
   // 執行片頭
     async function run(){
-    playBgm();    // 這裡不動
+    playBgm();   
     showOverlay();
 
     for(const f of frames){
