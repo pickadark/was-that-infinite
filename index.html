@@ -585,6 +585,20 @@ function updateMissionProgress(){
       let i=0; for(const ch of s){ if(ch===n[i]) i++; if(i===n.length) return true; }
       return false;
     }
+    function renderCatalog(filter=''){
+  const items = Object.entries(state.unlocked)
+    .map(([n,e]) => ({n,e}))
+    .filter(x => fuzzyMatch(x.n, filter))
+    .sort((a,b) => a.n.localeCompare(b.n,'zh-Hant'));
+  
+  updateCatalogItems(items);
+  
+  // stats - 使用 requestAnimationFrame 避免阻塞
+  requestAnimationFrame(() => {
+    const total = Object.keys(state.unlocked).length;
+    statsPill.textContent = `${total} 項`;
+  });
+}
     function updateCatalogItems(items) {
   const existingCards = new Map();
   
