@@ -1043,6 +1043,13 @@ function hardReset(){
   renderAll();
   toast('已重置');
   try { localStorage.removeItem('iec_seen_intro_v2'); } catch {}
+  const intro = document.getElementById('intro');
+const textEl = document.getElementById('introText');
+if (intro && textEl) {
+  intro.classList.remove('hidden');
+  intro.classList.remove('fade');
+  textEl.textContent = '點擊以開始';
+}
 }
 
 
@@ -1251,16 +1258,18 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
       document.getElementById('ver').textContent = SAVE_VERSION;
     }
     try{ renderAll(); } catch(e){ console.error('render error', e); toast('初始化失敗'); }
-// --- Opening Cutscene: "Was that Infinite?" ---
 
+// --- Opening Cutscene: "Was that Infinite?" ---
 (function installOpening(){
   const INTRO_KEY = 'iec_seen_intro_v2';
-  // 已看過就略過
+  // 已看過就略過，直接進入遊戲
   try { if (localStorage.getItem(INTRO_KEY)) return; } catch {}
 
   const intro   = document.getElementById('intro');
   const textEl  = document.getElementById('introText');
+  const bgm = document.getElementById('introBgm');
   if(!intro || !textEl) return;
+  intro.classList.remove('hidden');
   textEl.textContent = '點擊以開始';
 
   const frames = [
@@ -1272,39 +1281,36 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
     { t: '載入基礎元素………載入完成。', hold: 2500 },
     { t: '準備就緒。', hold: 2500 },
   ];
-  const bgm = document.getElementById('introBgm');
-})();
+
   function playBgm(){
-  if (!bgm) return;
-  bgm.currentTime = 0;
-  bgm.volume = 0;
+    if (!bgm) return;
+    bgm.currentTime = 0;
+    bgm.volume = 0;
 
-  const fadeIn = () => {
-    let v = 0;
-    const fade = setInterval(()=>{
-      v += 0.05;
-      if(v >= 0.4){ v = 0.4; clearInterval(fade); }
-      bgm.volume = v;
-    }, 120);
-  };
+    const fadeIn = () => {
+      let v = 0;
+      const fade = setInterval(()=>{
+        v += 0.05;
+        if(v >= 0.4){ v = 0.4; clearInterval(fade); }
+        bgm.volume = v;
+      }, 120);
+    };
 
-  const tryPlay = () => {
-    bgm.play().then(fadeIn).catch(() => {
-      const once = () => {
-        document.removeEventListener('pointerdown', once, {capture:false});
-        bgm.play().then(fadeIn).catch(()=>{ /* 還不行就算了 */ });
-      };  
-      document.addEventListener('pointerdown', once, {once:true});
-    });
-  };
+    const tryPlay = () => {
+      bgm.play().then(fadeIn).catch(() => {
+        const once = () => {
+          document.removeEventListener('pointerdown', once, {capture:false});
+          bgm.play().then(fadeIn).catch(()=>{ /* 還不行就算了 */ });
+        };  
+        document.addEventListener('pointerdown', once, {once:true});
+      });
+    };
 
-  tryPlay();
-}
-
+    tryPlay();
+  }
 
   function stopBgm(){
     if (!bgm) return;
-    // 漸出
     let v = bgm.volume;
     const fade = setInterval(()=>{
       v -= 0.05;
@@ -1313,7 +1319,7 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
     }, 120);
   }
 
-  // 打字機
+  // 打字機效果
   function typeLine(str, speed = 65){
     return new Promise(resolve=>{
       let i = 0, out = '';
@@ -1328,23 +1334,16 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
     });
   }
 
-  // 淡入容器
-  function showOverlay(){
-    intro.classList.remove('hidden');
-    // 觸發重繪以啟用過場
-    void intro.offsetHeight;
-    intro.classList.remove('fade');
-  }
-
   function hideOverlay(){
     intro.classList.add('fade');
     setTimeout(()=> intro.classList.add('hidden'), 750);
   }
 
-  // 執行片頭
-    async function run(){
+  // 執行開場動畫
+  async function run(){
+    textEl.textContent = '';
+    
     playBgm();   
-    showOverlay();
 
     for(const f of frames){
       await typeLine(f.t);
@@ -1352,13 +1351,17 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
       textEl.textContent = textEl.textContent + '\n';
     }
 
+    // 標記已看過，隱藏開場
     try { localStorage.setItem(INTRO_KEY, '1'); } catch {}
     hideOverlay();
     stopBgm();
-    intro.addEventListener('pointerdown', ()=>{
-  run();
-}, {once:true});
   }
+  intro.addEventListener('pointerdown', ()=>{
+    run();
+  }, {once:true});
+
+})();
+
   </script>
 </body>
 </html>
