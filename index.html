@@ -430,18 +430,10 @@ preloadElementImages();
 
 function getElementDisplayConfig(name, isRare = false) {
   const config = elementDisplay[name];
-  
   if (!config) {
-    // 沒有特殊配置，使用預設行為（只顯示 emoji）
-    return {
-      showEmoji: true,
-      showImage: false,
-      emoji: resultEmojiMap[name] || pickEmojiByName(name)
-    };
+    // 預設只提供顯示模式，不提供 emoji，避免覆蓋傳入值
+    return { showEmoji: true, showImage: false };
   }
-  
-
-  
   return {
     ...config,
     emoji: config.customEmoji || resultEmojiMap[name] || pickEmojiByName(name)
@@ -664,7 +656,7 @@ function generateName(a,b){
 const emojiImgCache = new Map();
 
 function makeCard(name, emojis, your = false) {
-  const list = Array.isArray(emojis) ? emojis : [emojis];
+  const list = Array.isArray(emojis) ? emojis : (emojis != null ? [emojis] : []);
   const el = document.createElement('div');
   el.className = 'card';
   if (your) el.classList.add('your');
@@ -674,26 +666,21 @@ function makeCard(name, emojis, your = false) {
   const emojiContainer = document.createElement('div');
   emojiContainer.className = 'emoji-container';
 
-
   const displayConfig = getElementDisplayConfig(name, your);
 
   if (displayConfig.showImage && displayConfig.image) {
     createImageElement(emojiContainer, displayConfig.image, name, displayConfig);
   }
 
-
   if (displayConfig.showEmoji) {
-    const emojiToShow = displayConfig.emoji || list;
-    
+    const emojiToShow = (list.length > 0) ? list : (displayConfig.emoji || list);
+
     emojiToShow.forEach(emoji => {
       const emojiEl = document.createElement('div');
       emojiEl.className = 'emoji';
       if (isApplePlatform()) {
-        // 蘋果平台直接用文字 emoji
         emojiEl.textContent = emoji;
       } else {
-
-        // 其他平台用快取的蘋果風格圖片
         let imgNode;
         if (emojiImgCache.has(emoji)) {
           imgNode = emojiImgCache.get(emoji).cloneNode(true);
@@ -708,22 +695,23 @@ function makeCard(name, emojis, your = false) {
         }
         emojiEl.appendChild(imgNode);
       }
-
       emojiContainer.appendChild(emojiEl);
     });
   }
 
   el.appendChild(emojiContainer);
 
-
   const nameEl = document.createElement('div');
   nameEl.className = 'name';
   nameEl.textContent = name;
   el.appendChild(nameEl);
-  
+
   add3DTiltEffect(el);
   return el;
 }
+
+
+
 // 3D 傾斜跟隨效果函數
 function add3DTiltEffect(cardElement) {
   cardElement.addEventListener('dragstart', () => {
