@@ -1031,21 +1031,7 @@ function hardReset(){
   renderAll();
   toast('已重置');
   try { localStorage.removeItem('iec_seen_intro_v2'); } catch {}
-
-  const intro = document.getElementById('intro');
-  const textEl = document.getElementById('introText');
-  if (intro && textEl) {
-    intro.classList.remove('hidden');
-    intro.classList.remove('fade');
-    textEl.textContent = '點擊以開始';
-
-    // 補掛一次性的點擊處理
-    const closeIntro = () => {
-      try { localStorage.setItem('iec_seen_intro_v2', '1'); } catch {}
-      intro.classList.add('fade');
-      setTimeout(() => intro.classList.add('hidden'), 750);
-    };
-    intro.addEventListener('pointerdown', closeIntro, { once: true });
+  location.reload();   // 讓 installOpening() 重新註冊並播放完整開場
   }
 }
 
