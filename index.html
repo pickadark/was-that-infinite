@@ -1065,6 +1065,36 @@ if (intro && textEl) {
         combine(a,b,e.clientX - rect.left, e.clientY - rect.top);
       }
     });
+    // 極簡補丁：讓丟在卡片上也會觸發合成（修正版：避免雙觸發）
+const board = document.querySelector('.board');
+
+board.addEventListener('dragover', e => {
+  if (dropzone.contains(e.target)) return;   // 讓原本 dropzone 自行處理
+  e.preventDefault();
+}, { capture: true });
+
+board.addEventListener('drop', e => {
+  if (dropzone.contains(e.target)) return;   // 關鍵：避免觸發兩次
+  e.preventDefault();
+  dropzone.style.borderColor = '#2a3250';
+
+  const raw = e.dataTransfer.getData('text/plain');
+  const parsed = safeParseJSON(raw);
+  if (!parsed.ok || !parsed.val) return toast('拖放資料格式錯誤');
+  const { name, emoji } = parsed.val;
+  if (typeof name !== 'string' || !Array.isArray(emoji)) return toast('拖放資料缺少欄位');
+
+  const rect = workspace.getBoundingClientRect();
+  const x = e.clientX - rect.left, y = e.clientY - rect.top;
+
+  spawnToken(name, emoji, x, y);
+  pending.push({ name, emoji });
+  if (pending.length >= 2) {
+    const [a, b] = pending.splice(0, 2);
+    combine(a, b, x, y);
+  }
+}, { capture: true });
+
 
     function spawnToken(name, emoji, x,y){
       const t = document.createElement('div');
