@@ -177,8 +177,29 @@ body {
 .intro, .intro * {
   font-family: 'GlowSansTC', sans-serif;
 }
+    @keyframes energyRipple {
+      0% {
+        transform: translate(-50%, -50%) scale(0);
+        opacity: 0.8;
+      }
+      50% {
+        opacity: 0.4;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(4);
+        opacity: 0;
+      }
+    }
 
-
+    .energy-ripple {
+      position: absolute;
+      width: 45px;
+      height: 45px;
+      border: 3px solid #6dd5fa;
+      border-radius: 50%;
+      animation: energyRipple 0.6s ease-out forwards;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -295,6 +316,8 @@ const firstPool = [
 const seedRecipes = {
   '水+土':['泥',['🟤']],
   '火+火':['烈焰',['🔥','🔥']],
+  '烈焰+火':['強烈焰',['🔥','🔥']],
+  '烈焰+烈焰':['熾焰',['🔥','🔥']],
   '水+水':['河',['💧','🌊']],
   '火+水':['蒸氣',['💨']],
   '風+風':['颶風',['💨','💨']],
@@ -325,6 +348,8 @@ const seedRecipes = {
   '細胞+火':['火細胞',['🦠','🔥']],
   '火+土':['磚',['🧱']],
   '生命+光':['靈魂',['👻']],
+  '靈魂+生命':['動物',['🐾']],
+  '動物+智慧':['人類',['👨']],
   '靈魂+細胞':['智慧',['🧠']],
   '火+泥':['黏土',['🟤','🪨']],
   '牆+天空':['天花板',['🏠','⬜']],
@@ -356,6 +381,7 @@ const seedRecipes = {
   '水+時間':['冰',['🧊']],
   '水+冰':['雪',['❄️']],
   '火+雜金屬':['熔爐',['🔥','🏭']],
+  '熔爐+磁鐵礦':['磁鐵',['🧲']],
   '生命+水':['魚',['🐟']],
   '魚+電':['電鰻',['🐟','⚡']],
   '土+時間':['化石',['🦴']],
@@ -747,8 +773,8 @@ function add3DTiltEffect(cardElement) {
     const mouseX = e.clientX - centerX;
     const mouseY = e.clientY - centerY;
     
-    const tiltX = (mouseY / rect.height) * -15;
-    const tiltY = (mouseX / rect.width) * 15;
+    const tiltX = (mouseY / rect.height) * -20;
+    const tiltY = (mouseX / rect.width) * 20;
     
     cardElement.style.transform = `
       translateY(-8px) 
@@ -773,12 +799,20 @@ function add3DTiltEffect(cardElement) {
       for(let i=0;i<6;i++){
         const s = document.createElement('div');
         s.className = 'sparkle'; s.textContent = '✨';
-        s.style.left = x + (Math.random()*60-30) + 'px';
-        s.style.top  = y + (Math.random()*30-10) + 'px';
+        s.style.left = x + (Math.random()*66-33) + 'px';
+        s.style.top  = y + (Math.random()*33  -11) + 'px';
         container.appendChild(s);
         setTimeout(()=>s.remove(), 900);
       }
     }
+    function createEnergyRipple(x, y, container) {
+      const ripple = document.createElement('div');
+      ripple.className = 'energy-ripple';
+      ripple.style.left = x + 'px';
+      ripple.style.top = y + 'px';
+      container.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 350);
+}
     // 音效管理系統
 class AudioPool {
   constructor() {
@@ -1133,20 +1167,22 @@ board.addEventListener('drop', e => {
     const emoji = pickEmojiByName(name);
     res = {name, emoji};
   }
-
-  // 紀錄 & 解鎖
-  state.known[key] = res;
-  if(!state.unlocked[res.name]){ state.unlocked[res.name]=res.emoji; isNew = true; }
-  const productToken = spawnToken(
-    res.name,
-    res.emoji,
-    x + (Math.random() * 40 - 20),
-    y + (Math.random() * 20 - 10)
-  );
-  spark(x,y,workspace);
+const productX = x + (Math.random() * 40 - 20);
+const productY = y + (Math.random() * 20 - 10);
+// 紀錄 & 解鎖
+state.known[key] = res;
+if(!state.unlocked[res.name]){ state.unlocked[res.name]=res.emoji; isNew = true; }
+const productToken = spawnToken(
+  res.name,
+  res.emoji,
+  productX, 
+  productY   
+);
+  createEnergyRipple(productX, productY, workspace);
+  spark(productX,productY,workspace);
   setTimeout(() => {
   if (productToken) productToken.classList.add('fade-out');
-}, 1450);
+}, 1210);
   setTimeout(() => { if (productToken) productToken.remove(); }, 1700);
   state.history.push({a,b,res});
   if (state.history.length > 35) {
