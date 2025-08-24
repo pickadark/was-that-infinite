@@ -6,6 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Was that Infinite? — Local Prototype</title>
   <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap');
+    :root{
+      --bg:#0f1115; --panel:#141823; --card:#1a2030; --muted:#9aa0a6; --fg:#e9eef5; --accent:#6dd5fa; --accent2:#7f53ac;
+      --good:#19c37d; --warn:#ffb020; --bad:#ff5d5d; --glow:0 0 0 1px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.45);
+    }
+    html,body{height:100%}
         @font-face{
   font-family:'GlowSansTC';
   src:url('GlowSansTC-subset.woff2') format('woff2');
@@ -13,12 +19,7 @@
   font-style:normal;
   font-display:swap;
 }
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC&display=swap');
-    :root{
-      --bg:#0f1115; --panel:#141823; --card:#1a2030; --muted:#9aa0a6; --fg:#e9eef5; --accent:#6dd5fa; --accent2:#7f53ac;
-      --good:#19c37d; --warn:#ffb020; --bad:#ff5d5d; --glow:0 0 0 1px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.45);
-    }
-    html,body{height:100%}
+
 
 body {
   margin:0;
@@ -174,7 +175,7 @@ body {
       /* armed reset visual */
     #resetBtn.armed{ border-color:#ff4d4f !important; background:linear-gradient(135deg, rgba(255,77,79,.18), rgba(255,77,79,.08)); color:#ffecec }
 .intro, .intro * {
-  font-family: 'GlowSansTC' sans-serif;
+  font-family: 'GlowSansTC', sans-serif;
 }
 
 
@@ -1037,8 +1038,13 @@ if (intro && textEl) {
   intro.classList.remove('hidden');
   intro.classList.remove('fade');
   textEl.textContent = '點擊以開始';
+  intro.addEventListener('pointerdown', ()=>{
+    if (typeof window.__runIntro === 'function') window.__runIntro();
+  }, { once: true });
 }
+
 }
+
 
 
     // ---------- Workspace Drag & Combine ----------
@@ -1374,6 +1380,7 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
     hideOverlay();
     stopBgm();
   }
+  window.__runIntro = run;
   intro.addEventListener('pointerdown', ()=>{
     run();
   }, {once:true});
