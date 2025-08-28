@@ -1262,14 +1262,7 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
       
       const result = await SafeFile.import(parsed.val);
       if (!result.success) {
-        if (validateState(parsed.val)) {
-          state = parsed.val; 
-          saveState(); 
-          renderAll(); 
-          toast('以相容模式匯入成功');
-        } else {
-          toast('匯入失敗：' + result.reason);
-        }
+         toast('匯入失敗：' + result.reason);
         return;
       }
       
