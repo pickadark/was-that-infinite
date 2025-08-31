@@ -1173,15 +1173,29 @@ function hardReset(){
   toast('已重置');
   try { localStorage.removeItem('iec_seen_intro_v2'); } catch {}
   const intro = document.getElementById('intro');
-const textEl = document.getElementById('introText');
-if (intro && textEl) {
-  intro.classList.remove('hidden');
-  intro.classList.remove('fade');
-  textEl.textContent = '點擊以開始';
-  intro.addEventListener('pointerdown', ()=>{
-    if (typeof window.__runIntro === 'function') window.__runIntro();
-  }, { once: true });
-}
+  const textEl = document.getElementById('introText');
+  if (intro && textEl) {
+    intro.classList.remove('hidden');
+    intro.classList.remove('fade');
+    textEl.textContent = '點擊以開始';
+    // ensure focusable/clickable
+    try { intro.setAttribute('tabindex', '0'); } catch {}
+    try { intro.style.cursor = 'pointer'; } catch {}
+    // start intro on pointerdown, click, or Enter/Space; guard against duplicate triggers
+    let started = false;
+    const startIntro = (ev) => {
+      if (started) return; started = true;
+      if (ev && ev.type === 'keydown') {
+        const k = ev.key;
+        if (k !== 'Enter' && k !== ' ') { started = false; return; }
+        ev.preventDefault();
+      }
+      if (typeof window.__runIntro === 'function') window.__runIntro();
+    };
+    intro.addEventListener('pointerdown', startIntro, { once: true });
+    intro.addEventListener('click', startIntro, { once: true });
+    intro.addEventListener('keydown', startIntro, { once: true });
+  }
 
 }
 
