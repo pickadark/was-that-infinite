@@ -1069,13 +1069,58 @@ function renderBook() {
       for(const h of state.history.slice(-120).reverse()){
         const row = document.createElement('div');
         row.className='combo';
-        row.innerHTML = `
-          <div class="mini"><div class="emoji">${h.a.emoji.join('')}</div><div class="name">${h.a.name}</div></div>
-          <div>+</div>
-          <div class="mini"><div class="emoji">${h.b.emoji.join('')}</div><div class="name">${h.b.name}</div></div>
-          <div>=</div>
-          <div class="mini"><div class="emoji">${h.res.emoji.join('')}</div><div class="name">${h.res.name}</div></div>
-        `;
+
+        // 元素 A
+        const miniA = document.createElement('div');
+        miniA.className = 'mini';
+        const emojiA = document.createElement('div');
+        emojiA.className = 'emoji';
+        createEmojiElements(emojiA, h.a.emoji);
+        const nameA = document.createElement('div');
+        nameA.className = 'name';
+        nameA.textContent = h.a.name;
+        miniA.appendChild(emojiA);
+        miniA.appendChild(nameA);
+
+        // 加號
+        const plus = document.createElement('div');
+        plus.textContent = '+';
+
+        // 元素 B
+        const miniB = document.createElement('div');
+        miniB.className = 'mini';
+        const emojiB = document.createElement('div');
+        emojiB.className = 'emoji';
+        createEmojiElements(emojiB, h.b.emoji);
+        const nameB = document.createElement('div');
+        nameB.className = 'name';
+        nameB.textContent = h.b.name;
+        miniB.appendChild(emojiB);
+        miniB.appendChild(nameB);
+
+        // 等號
+        const equals = document.createElement('div');
+        equals.textContent = '=';
+
+        // 結果元素
+        const miniRes = document.createElement('div');
+        miniRes.className = 'mini';
+        const emojiRes = document.createElement('div');
+        emojiRes.className = 'emoji';
+        createEmojiElements(emojiRes, h.res.emoji);
+        const nameRes = document.createElement('div');
+        nameRes.className = 'name';
+        nameRes.textContent = h.res.name;
+        miniRes.appendChild(emojiRes);
+        miniRes.appendChild(nameRes);
+
+        // 組裝
+        row.appendChild(miniA);
+        row.appendChild(plus);
+        row.appendChild(miniB);
+        row.appendChild(equals);
+        row.appendChild(miniRes);
+
         frag.appendChild(row);
       }
       comboLogEl.appendChild(frag);
@@ -1087,10 +1132,22 @@ function renderMissions(){
   for(const m of state.missions){
     const row = document.createElement('div');
     row.className = 'mission';
-    row.innerHTML = `<div class="emoji">${m.emoji.join('')}</div><div class="name ${m.done?'done':''}">${m.name}</div>`;
+
+    // Emoji 容器
+    const emojiEl = document.createElement('div');
+    emojiEl.className = 'emoji';
+    createEmojiElements(emojiEl, m.emoji);
+
+    // 名稱
+    const nameEl = document.createElement('div');
+    nameEl.className = m.done ? 'name done' : 'name';
+    nameEl.textContent = m.name;
+
+    row.appendChild(emojiEl);
+    row.appendChild(nameEl);
     missionsEl.appendChild(row);
   }
-  updateMissionProgress(); 
+  updateMissionProgress();
 }
 //regen toolset
 function getAllElementNames(){
