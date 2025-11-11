@@ -3,6 +3,8 @@
 <head>
   <script src="safefile.js"></script>
   <script src="recipes.js"></script>
+  <script src="combineEngine.js"></script>
+  <script src="emojiRenderer.js"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Was that Infinite? — Local Prototype</title>
@@ -313,147 +315,10 @@ body {
     // ---------- Data ----------
     // firstPool 和 seedRecipes 已移至 recipes.js
 
-const elementDisplay = {
-  //控制圖片or emoji
-  '龍之心': {
-    showEmoji: false,
-    showImage: true,
-    image: 'images/dragon_heart.png'
-  },
-};
+    // ---------- Emoji Renderer ----------
+    // Emoji 渲染引擎已抽離至 emojiRenderer.js
+    const emojiRenderer = new EmojiRenderer();
 
-// ========== 管理函數 ==========
-// 動態調整顯示模式
-function setDisplayMode(elementName, mode) {
-  const modes = {
-    'emoji-only': { showEmoji: true, showImage: false },
-    'image-only': { showEmoji: false, showImage: true },
-    'mixed': { showEmoji: true, showImage: true },
-    'auto': { showEmoji: true, showImage: true }
-  };
-  
-  if (modes[mode]) {
-    if (!elementDisplay[elementName]) elementDisplay[elementName] = {};
-    Object.assign(elementDisplay[elementName], modes[mode]);
-  }
-}
-
-
-function debugElementDisplay(elementName) {
-  const config = getElementDisplayConfig(elementName);
-  console.log(`${elementName} 顯示配置:`, config);
-}
-
-
-async function preloadElementImages() {
-  const imagesToLoad = new Set();
-  
-  Object.values(elementDisplay).forEach(config => {
-    if (config.image) imagesToLoad.add(config.image);
-    if (config.images) config.images.forEach(img => imagesToLoad.add(img));
-  });
-  
-  console.log(`開始預載入 ${imagesToLoad.size} 張圖片...`);
-  
-  const loadPromises = [...imagesToLoad].map(src => {
-    return new Promise(resolve => {
-      const img = new Image();
-      img.onload = () => resolve({ src, success: true });
-      img.onerror = () => resolve({ src, success: false });
-      img.src = src;
-    });
-  });
-  
-  const results = await Promise.all(loadPromises);
-  const successful = results.filter(r => r.success).length;
-  
-  console.log(`預載入完成: ${successful}/${results.length} 張圖片成功`);
-  const failed = results.filter(r => !r.success);
-  if (failed.length > 0) {
-    console.warn('載入失敗的圖片:', failed.map(f => f.src));
-  }
-  
-  return { total: results.length, successful, failed: failed.length };
-}
-// 初始化
-
-preloadElementImages();
-
-function getElementDisplayConfig(name, isRare = false) {
-  const config = elementDisplay[name];
-  if (!config) {
-    // 預設只提供顯示模式，不提供 emoji，避免覆蓋傳入值
-    return { showEmoji: true, showImage: false };
-  }
-  return {
-    ...config,
-    emoji: config.customEmoji || resultEmojiMap[name] || pickEmojiByName(name)
-  };
-}
-function createImageElement(container, imageSrc, name, config) {
-  const wrapper = document.createElement('div');
-  wrapper.className = 'emoji custom-image';
-  
-  const img = document.createElement('img');
-  img.src = imageSrc;
-  img.alt = name;
-  img.width = 28;
-  img.height = 28;
-  
-  img.onerror = function() {
-    console.warn(`Image failed to load: ${imageSrc}`);
-    
-    if (config.fallbackEmoji) {
-      
-      wrapper.innerHTML = '';
-      wrapper.className = 'emoji';
-      
-      config.fallbackEmoji.forEach(emoji => {
-        const emojiEl = createSingleEmojiElement(emoji);
-        wrapper.appendChild(emojiEl);
-      });
-    } else {
-      // 直接移除失敗的圖片
-      wrapper.remove();
-    }
-  };
-  
-  wrapper.appendChild(img);
-  container.appendChild(wrapper);
-  return wrapper;
-}
-function createSingleEmojiElement(emoji) {
-  const emojiEl = document.createElement('div');
-  emojiEl.className = 'emoji';
-
-  if (isApplePlatform()) {
-    emojiEl.textContent = emoji;
-  } else {
-    let imgNode;
-    if (emojiImgCache.has(emoji)) {
-      imgNode = emojiImgCache.get(emoji).cloneNode(true);
-    } else {
-      const img = document.createElement('img');
-      img.src = `https://emojicdn.elk.sh/${encodeURIComponent(emoji)}?style=apple&size=64`;
-      img.alt = emoji;
-      img.width = 28;
-      img.height = 28;
-      emojiImgCache.set(emoji, img);
-      imgNode = img.cloneNode(true);
-    }
-    emojiEl.appendChild(imgNode);
-  }
-
-  return emojiEl;
-}
-function createEmojiElements(container, emojiList) {
-  const list = Array.isArray(emojiList) ? emojiList : [emojiList];
-  
-  list.forEach(emoji => {
-    const emojiEl = createSingleEmojiElement(emoji);
-    container.appendChild(emojiEl);
-  });
-}
 const normPair = (a,b) => [a,b].sort().join('+');
 const seedMap = {};
 for (const [k, v] of Object.entries(seedRecipes)) {
@@ -573,6 +438,10 @@ function pickEmojiByName(name) {
   return found.length ? found : [randomFrom(emojiPool)];
 }
 
+// Initialize emojiRenderer with helper functions
+emojiRenderer.setEmojiHelpers(pickEmojiByName, resultEmojiMap);
+emojiRenderer.initialize();
+
 // 隨機保底
 function randomFrom(arr) {
   return arr && arr.length ? arr[Math.floor(Math.random() * arr.length)] : '❓';
@@ -617,13 +486,6 @@ function generateName(a,b){
     .replace(/(火)火/g, '雙火')
     .replace(/(水)水/g, '雙水');
 }
- function isApplePlatform() {
-  return /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
-
-// 簡單的快取 Map：emoji -> <img> 節點
-const emojiImgCache = new Map();
-
 function makeCard(name, emojis, your = false) {
   const list = Array.isArray(emojis) ? emojis : (emojis != null ? [emojis] : []);
   const el = document.createElement('div');
@@ -635,38 +497,8 @@ function makeCard(name, emojis, your = false) {
   const emojiContainer = document.createElement('div');
   emojiContainer.className = 'emoji-container';
 
-  const displayConfig = getElementDisplayConfig(name, your);
-
-  if (displayConfig.showImage && displayConfig.image) {
-    createImageElement(emojiContainer, displayConfig.image, name, displayConfig);
-  }
-
-  if (displayConfig.showEmoji) {
-    const emojiToShow = (list.length > 0) ? list : (displayConfig.emoji || list);
-
-    emojiToShow.forEach(emoji => {
-      const emojiEl = document.createElement('div');
-      emojiEl.className = 'emoji';
-      if (isApplePlatform()) {
-        emojiEl.textContent = emoji;
-      } else {
-        let imgNode;
-        if (emojiImgCache.has(emoji)) {
-          imgNode = emojiImgCache.get(emoji).cloneNode(true);
-        } else {
-          const img = document.createElement('img');
-          img.src = `https://emojicdn.elk.sh/${encodeURIComponent(emoji)}?style=apple&size=64`;
-          img.alt = emoji;
-          img.width = 28;
-          img.height = 28;
-          emojiImgCache.set(emoji, img);
-          imgNode = img.cloneNode(true);
-        }
-        emojiEl.appendChild(imgNode);
-      }
-      emojiContainer.appendChild(emojiEl);
-    });
-  }
+  // 使用 emojiRenderer 渲染元素視覺
+  emojiRenderer.renderElementVisual(emojiContainer, name, list);
 
   el.appendChild(emojiContainer);
 
@@ -678,8 +510,6 @@ function makeCard(name, emojis, your = false) {
   add3DTiltEffect(el);
   return el;
 }
-
-
 
 // 3D 傾斜跟隨效果函數
 function add3DTiltEffect(cardElement) {
@@ -978,7 +808,7 @@ function renderBook() {
         miniA.className = 'mini';
         const emojiA = document.createElement('div');
         emojiA.className = 'emoji';
-        createEmojiElements(emojiA, h.a.emoji);
+        emojiRenderer.createEmojiElements(emojiA, h.a.emoji);
         const nameA = document.createElement('div');
         nameA.className = 'name';
         nameA.textContent = h.a.name;
@@ -994,7 +824,7 @@ function renderBook() {
         miniB.className = 'mini';
         const emojiB = document.createElement('div');
         emojiB.className = 'emoji';
-        createEmojiElements(emojiB, h.b.emoji);
+        emojiRenderer.createEmojiElements(emojiB, h.b.emoji);
         const nameB = document.createElement('div');
         nameB.className = 'name';
         nameB.textContent = h.b.name;
@@ -1010,7 +840,7 @@ function renderBook() {
         miniRes.className = 'mini';
         const emojiRes = document.createElement('div');
         emojiRes.className = 'emoji';
-        createEmojiElements(emojiRes, h.res.emoji);
+        emojiRenderer.createEmojiElements(emojiRes, h.res.emoji);
         const nameRes = document.createElement('div');
         nameRes.className = 'name';
         nameRes.textContent = h.res.name;
@@ -1039,7 +869,7 @@ function renderMissions(){
     // Emoji 容器
     const emojiEl = document.createElement('div');
     emojiEl.className = 'emoji-container';
-    createEmojiElements(emojiEl, m.emoji);
+    emojiRenderer.createEmojiElements(emojiEl, m.emoji);
 
     // 名稱
     const nameEl = document.createElement('div');
@@ -1162,132 +992,7 @@ function hardReset(){
 
 
     // ---------- Workspace Drag & Combine ----------
-    let pending = [];
-
-    dropzone.addEventListener('dragover', e=>{ e.preventDefault(); dropzone.style.borderColor = '#3b82f6'; });
-    dropzone.addEventListener('dragleave', ()=>{ dropzone.style.borderColor = '#2a3250'; });
-
-    dropzone.addEventListener('drop', e=>{
-      e.preventDefault(); dropzone.style.borderColor = '#2a3250';
-      const raw = e.dataTransfer.getData('text/plain');
-      const parsed = safeParseJSON(raw);
-      if(!parsed.ok || !parsed.val){ toast('拖放資料格式錯誤'); return; }
-      const data = parsed.val;
-      if (typeof data.name !== 'string' || !Array.isArray(data.emoji)) {
-  toast('拖放資料缺少欄位'); return;
-}
-
-      const rect = workspace.getBoundingClientRect();
-      spawnToken(data.name, data.emoji, e.clientX - rect.left, e.clientY - rect.top);
-      pending.push(data);
-      if(pending.length>=2){
-        const [a,b] = pending.splice(0,2);
-        combine(a,b,e.clientX - rect.left, e.clientY - rect.top);
-      }
-    });
-    // 極簡補丁：讓丟在卡片上也會觸發合成（修正版：避免雙觸發）
-const board = document.querySelector('.board');
-
-board.addEventListener('dragover', e => {
-  if (dropzone.contains(e.target)) return;   
-  e.preventDefault();
-}, { capture: true });
-
-board.addEventListener('drop', e => {
-  if (dropzone.contains(e.target)) return;   
-  e.preventDefault();
-  dropzone.style.borderColor = '#2a3250';
-
-  const raw = e.dataTransfer.getData('text/plain');
-  const parsed = safeParseJSON(raw);
-  if (!parsed.ok || !parsed.val) return toast('拖放資料格式錯誤');
-  const { name, emoji } = parsed.val;
-  if (typeof name !== 'string' || !Array.isArray(emoji)) return toast('拖放資料缺少欄位');
-
-  const rect = workspace.getBoundingClientRect();
-  const x = e.clientX - rect.left, y = e.clientY - rect.top;
-
-  spawnToken(name, emoji, x, y);
-  pending.push({ name, emoji });
-  if (pending.length >= 2) {
-    const [a, b] = pending.splice(0, 2);
-    combine(a, b, x, y);
-  }
-}, { capture: true });
-
-
-    function spawnToken(name, emoji, x,y){
-      const t = document.createElement('div');
-      t.className='token'; t.style.left=x+'px'; t.style.top=y+'px';
-      t.appendChild(makeCard(name,emoji));
-      workspace.appendChild(t);
-      return t;
-    }
-
- function combine(a,b,x,y){
-
-  document.querySelectorAll('.token').forEach(el => el.remove());
-
-  if (!Array.isArray(a.emoji)) a.emoji = [a.emoji];
-  if (!Array.isArray(b.emoji)) b.emoji = [b.emoji];
-
-  const key = normPair(a.name,b.name);
-  let res = state.known[key];
-  let isNew = false; let your = false;
-  if (!res) {
-    const seed = seedMap[key];
-    if (seed) {
-      const [name, emoji] = seed;
-      res = { name, emoji };
-    }
-  }
-
-  if(!res){
-    const name = generateName(a.name,b.name);
-    const emoji = pickEmojiByName(name);
-    res = {name, emoji};
-  }
-const productX = x + (Math.random() * 40 - 20);
-const productY = y + (Math.random() * 20 - 10);
-// 紀錄 & 解鎖
-state.known[key] = res;
-if(!state.unlocked[res.name]){ state.unlocked[res.name]=res.emoji; isNew = true; }
-const productToken = spawnToken(
-  res.name,
-  res.emoji,
-  productX, 
-  productY   
-);
-  createEnergyRipple(productX, productY, workspace);
-  spark(productX,productY,workspace);
-  setTimeout(() => {
-  if (productToken) productToken.classList.add('fade-out');
-}, 1210);
-  setTimeout(() => { if (productToken) productToken.remove(); }, 1700);
-  state.history.push({a,b,res});
-  if (state.history.length > 35) {
-    state.history.splice(0, 10);
-  }
-for (const m of state.missions) {
-  if (!m.done && m.name === res.name) {
-    m.done = true;
-    toast(`任務完成：${m.name} ${m.emoji.join('')}`);
-  }
-}
-// 全組完成才自動重擲
-const allDone = state.missions.length > 0 && state.missions.every(m => m.done);
-if (allDone) {
-  regenMissions();            
-}
-
-
-  saveState();
-
-  renderBook(); renderHistory(); renderCatalog(searchEl.value.trim()); renderMissions();
-
-  audioPool.play('combine');
-  toast(isNew? `New Discover：${res.name} ${res.emoji.join('')}` : `合成成功：${res.name} ${res.emoji.join('')}`);
-}
+    // 合成引擎已抽離至 combineEngine.js
 
        
 
@@ -1390,6 +1095,30 @@ document.getElementById('rerollMissions').addEventListener('click', ()=>{
       renderCatalog(); renderBook(); renderHistory(); renderMissions();
     }
     try{ renderAll(); } catch(e){ console.error('render error', e); toast('初始化失敗'); }
+
+    // ---------- Initialize Combine Engine ----------
+    const combineEngine = new CombineEngine({
+      state,
+      seedMap,
+      workspace,
+      dropzone,
+      searchEl,
+      makeCard,
+      generateName,
+      pickEmojiByName,
+      safeParseJSON,
+      createEnergyRipple,
+      spark,
+      saveState,
+      renderBook,
+      renderHistory,
+      renderCatalog,
+      renderMissions,
+      audioPool,
+      toast,
+      regenMissions
+    });
+    combineEngine.initializeDragAndDrop();
 
 // --- Opening Cutscene: "Was that Infinite?" ---
 (function installOpening(){
