@@ -460,6 +460,8 @@ function generateName(a,b){
     if(/金|鋼|鐵|機|齒|械|電|磁|核|量子|賽博|AI|晶片|電腦|機器/.test(n)) return 'tech';
     if(/魔|法|咒|符|靈|魂|幻|術|陣|祕|奧|神秘|巫|妖|鬼|神/.test(n)) return 'magic';
     if(/樹|花|草|木|森|林|葉|根|藤|苔|竹|菊|梅|蓮/.test(n)) return 'plant';
+    if(/光|亮|明|輝|曜|閃|耀|晶|璨|燦/.test(n)) return 'light';
+    if(/暗|黑|影|陰|幽|冥|闇|夜|昏/.test(n)) return 'dark';
     return 'other';
   };
   const ca = classify(a), cb = classify(b);
@@ -473,6 +475,9 @@ function generateName(a,b){
     name = ['魔化' + (ca==='creature'? a : b)];
   } else if((ca==='magic' && cb==='tech') || (cb==='magic' && ca==='tech')){
     name = ['奧術', '魔導'];
+  } else if ((ca==='light' && cb==='dark') || (cb==='light' && ca==='dark')) {
+    name = ['混沌', '陰陽', '平衡', '黃昏', '曙光'];
+  }
   
 
   } else {
