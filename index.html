@@ -469,7 +469,7 @@ function generateName(a,b){
     name = prefix + a;
   } else if((ca==='tech' && cb==='creature') || (cb==='tech' && ca==='creature')){
     name = ['賽博', '改造' + (ca==='creature'? a : b)];
-  } else if((ca==='magic' && cb==='creature') || (cb==='tech' && ca==='creature')){
+  } else if((ca==='magic' && cb==='creature') || (cb==='magic' && ca==='creature')){
     name = ['魔化' + (ca==='creature'? a : b)];
   } else if((ca==='magic' && cb==='tech') || (cb==='magic' && ca==='tech')){
     name = ['奧術', '魔導'];
